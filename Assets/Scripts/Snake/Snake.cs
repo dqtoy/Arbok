@@ -1,20 +1,26 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Snake : MonoBehaviour {
-
-    public GameObject head;
-
+    public GameObject snakeLinkPrefab;
+    public List<GameObject> links = new List<GameObject>();
 
     public float movesPerSecond = 5;
-    float elapsedTime = 0;
 
+    GameObject head;
+    GameObject tail;
+    float elapsedTime = 0;
+    bool growOnNextMove = false;
     Direction direction = Up.I;
 
-    void Start () {
-		
+    void Awake () {
+        head = GameObject.Instantiate(snakeLinkPrefab);
+        tail = head;
+        head.transform.parent = transform;
+		links.Insert(0, head);
 	}
 	
 	void Update () {
@@ -40,13 +46,30 @@ public class Snake : MonoBehaviour {
             elapsedTime -= 1 / movesPerSecond;
 
             float speed = 1.0f;
-            transform.Translate(speed * direction.GetMoveVector());
-            // Move here
+            
+            Vector3 newPosition = head.transform.position + speed * direction.GetMoveVector();
+
+            if (growOnNextMove) {
+                growOnNextMove = false;
+                var newLink = GameObject.Instantiate(snakeLinkPrefab);
+                newLink.transform.parent = transform;
+                newLink.transform.position = newPosition;
+                head = newLink;
+                links.Insert(0, head);
+            } else {
+                var tail = links[links.Count - 1];
+                head = tail;
+                links.RemoveAt(links.Count - 1);
+                links.Insert(0, tail);
+                tail = links[links.Count - 1];
+                head.transform.position = newPosition;
+            }
         }
     }
 
     void Grow() {
-
+        Debug.Log("GROW");
+        growOnNextMove = true;
     }
 
     void OnTriggerEnter(Collider other)
