@@ -9,7 +9,7 @@ PHASE ARBOK
 ## TODO
 - [x] no 108 turns
 - [ ] spawn apples
-- [ ] collide with self
+- [x] collide with self
 - [ ] change direction immediately on keypress
 - [ ] 2 player snake (AI?)
 - [ ] border slowly shrinking, or falling away

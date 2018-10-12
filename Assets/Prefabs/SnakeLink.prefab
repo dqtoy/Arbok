@@ -21,6 +21,7 @@ GameObject:
   - component: {fileID: 4139415988969718}
   - component: {fileID: 33070305864402002}
   - component: {fileID: 23781922745866620}
+  - component: {fileID: 114207205940204932}
   - component: {fileID: 65732932224551058}
   m_Layer: 0
   m_Name: SnakeLink
@@ -96,3 +97,14 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &114207205940204932
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1995817324930174}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d00496a288d98a246b2863c223fee9b8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
