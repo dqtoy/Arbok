@@ -17,34 +17,37 @@ public class Snake : MonoBehaviour {
     bool growOnNextMove = false;
     Direction direction = Up.I;
     Direction nextDirection = Up.I;
+    public ISnakeController controller;
 
     void Awake () {
         head = GameObject.Instantiate(snakeLinkPrefab);
         tail = head;
+        head.transform.position = transform.position;
         head.transform.parent = transform;
 		links.Insert(0, head);
         nextDirection = direction;
 	}
 	
 	void Update () {
-        if (direction != Down.I && (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)))
+        if (direction != Down.I && controller.IsUpButtonPressed())
         {
             nextDirection = Up.I;
         }
-        if (direction != Left.I && (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)))
+        if (direction != Left.I && controller.IsRightButtonPressed())
         {
             nextDirection = Right.I;
         }
-        if (direction != Up.I && (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)))
+        if (direction != Up.I && controller.IsDownButtonPressed())
         {
             nextDirection = Down.I;
         }
-        if (direction != Right.I && (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)))
+        if (direction != Right.I && controller.IsLeftButtonPressed())
         {
             nextDirection = Left.I;
         }
 
         elapsedTime += Time.deltaTime;
+
         if(elapsedTime > (1 / movesPerSecond)) {
             elapsedTime -= 1 / movesPerSecond;
 

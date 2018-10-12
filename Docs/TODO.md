@@ -12,5 +12,6 @@ PHASE ARBOK
 - [x] collide with self
 - [ ] change direction immediately on keypress
 - [ ] 2 player snake (AI?)
+    - [ ] snakes collide with eachother
 - [ ] border slowly shrinking, or falling away
 
