@@ -116,6 +116,7 @@ public class Snake : MonoBehaviour {
         }
         if (other.gameObject.HasComponent<Apple>())
         {
+            Destroy(other.gameObject);
             Grow();
         }
     }
