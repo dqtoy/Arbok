@@ -4,8 +4,12 @@ using UnityEngine;
 
 public class Up : Direction 
 {
-
     public static Up I = new Up();
+
+    public override Quaternion GetHeadRotation()
+    {
+        return Quaternion.Euler(0, 0, 0);
+    }
 
     public override Vector3 GetMoveVector()
     {

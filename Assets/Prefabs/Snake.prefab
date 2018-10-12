@@ -92,8 +92,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cafbc855d0948408ea13fcf2134d23ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  snakeLinkPrefab: {fileID: 1995817324930174, guid: 3e1224605a407fd498326ee935e39a1f,
+  snakeHeadPrefab: {fileID: 1522102895919218, guid: 3f721048a9a94614f92d79bc956cbd7f,
+    type: 2}
+  snakeTailPrefab: {fileID: 1061850045364242, guid: 596fe874a6272ce43ad4018b9b7e2753,
     type: 2}
   links: []
+  SnakeHeadMaterial: {fileID: 0}
   movesPerSecond: 10
   controller: {fileID: 114250507035605424}

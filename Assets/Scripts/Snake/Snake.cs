@@ -9,8 +9,10 @@ public class Snake : MonoBehaviour {
 
     public static List<Snake> snakes = new List<Snake>();
 
-    public GameObject snakeLinkPrefab;
+    public GameObject snakeHeadPrefab;
+    public GameObject snakeTailPrefab;
     public List<GameObject> links = new List<GameObject>();
+    public Material SnakeHeadMaterial;
 
     public float movesPerSecond = 5;
 
@@ -23,8 +25,7 @@ public class Snake : MonoBehaviour {
 
     void Awake () {
         snakes.Add(this);
-        head = GameObject.Instantiate(snakeLinkPrefab);
-        head.AddComponent<SnakeHead>();
+        head = GameObject.Instantiate(snakeHeadPrefab);
         head.transform.position = transform.position;
         head.transform.parent = transform;
 		links.Add(head);
@@ -66,24 +67,20 @@ public class Snake : MonoBehaviour {
 
             if (growOnNextMove) {
                 growOnNextMove = false;
-                var newLink = GameObject.Instantiate(snakeLinkPrefab);
-                newLink.AddComponent<SnakeTail>();
+                var newLink = GameObject.Instantiate(snakeTailPrefab);
                 newLink.transform.parent = transform;
                 newLink.transform.position = head.transform.position;
                 links.Insert(1, newLink);
 
-                head.transform.position = newPosition;
-            } else {
-                if (links.Count > 1) {
-                    var oldTail = links[links.Count - 1];
-                    links.RemoveAt(links.Count - 1);
-                    links.Insert(1, oldTail);
-
-                    oldTail.transform.position = head.transform.position;
-                }
-
-                head.transform.position = newPosition;
+            } else if (links.Count > 1) {
+                var oldTail = links[links.Count - 1];
+                links.RemoveAt(links.Count - 1);
+                links.Insert(1, oldTail);
+                oldTail.transform.position = head.transform.position;
             }
+
+            head.transform.rotation = direction.GetHeadRotation();
+            head.transform.position = newPosition;
         }
     }
 
@@ -113,7 +110,7 @@ public class Snake : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeLink>() && other.gameObject.HasComponent<SnakeTail>())) {
+        if(other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeTail>())) {
             Die();
         }
         if (other.gameObject.HasComponent<Apple>())
