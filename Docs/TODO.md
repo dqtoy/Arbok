@@ -7,6 +7,7 @@ PHASE ARBOK
 - arrow keys to move
 
 ## TODO
+- [x] no 108 turns
 - [ ] spawn apples
 - [ ] collide with self
 - [ ] change direction immediately on keypress

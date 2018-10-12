@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -15,6 +16,7 @@ public class Snake : MonoBehaviour {
     float elapsedTime = 0;
     bool growOnNextMove = false;
     Direction direction = Up.I;
+    Direction nextDirection = Up.I;
 
     void Awake () {
         head = GameObject.Instantiate(snakeLinkPrefab);
@@ -26,19 +28,19 @@ public class Snake : MonoBehaviour {
 	void Update () {
         if (direction != Down.I && (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)))
         {
-            direction = Up.I;
+            nextDirection = Up.I;
         }
         if (direction != Left.I && (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)))
         {
-            direction = Right.I;
+            nextDirection = Right.I;
         }
         if (direction != Up.I && (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)))
         {
-            direction = Down.I;
+            nextDirection = Down.I;
         }
         if (direction != Right.I && (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)))
         {
-            direction = Left.I;
+            nextDirection = Left.I;
         }
 
         elapsedTime += Time.deltaTime;
@@ -46,8 +48,14 @@ public class Snake : MonoBehaviour {
             elapsedTime -= 1 / movesPerSecond;
 
             float speed = 1.0f;
+
+            direction = nextDirection;
             
             Vector3 newPosition = head.transform.position + speed * direction.GetMoveVector();
+
+            if (AboutToCollideWithSelf(newPosition)) {
+                Die();
+            }
 
             if (growOnNextMove) {
                 growOnNextMove = false;
@@ -67,6 +75,15 @@ public class Snake : MonoBehaviour {
         }
     }
 
+    private bool AboutToCollideWithSelf(Vector3 newPosition)
+    {
+        return links.Any(x => x.transform.position == newPosition);
+    }
+
+    void Die() {
+        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
     void Grow() {
         Debug.Log("GROW");
         growOnNextMove = true;
@@ -74,8 +91,8 @@ public class Snake : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.HasComponent<Wall>()) {
-            SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        if(other.gameObject.HasComponent<Wall>() || other.gameObject.HasComponent<SnakeLink>()) {
+            Die();
         }
         if (other.gameObject.HasComponent<Apple>())
         {
