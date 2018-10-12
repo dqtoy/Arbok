@@ -6,6 +6,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Snake : MonoBehaviour {
+
+    public static List<Snake> snakes = new List<Snake>();
+
     public GameObject snakeLinkPrefab;
     public List<GameObject> links = new List<GameObject>();
 
@@ -20,6 +23,7 @@ public class Snake : MonoBehaviour {
     public ISnakeController controller;
 
     void Awake () {
+        snakes.Add(this);
         head = GameObject.Instantiate(snakeLinkPrefab);
         tail = head;
         head.transform.position = transform.position;
@@ -57,7 +61,7 @@ public class Snake : MonoBehaviour {
             
             Vector3 newPosition = head.transform.position + speed * direction.GetMoveVector();
 
-            if (AboutToCollideWithSelf(newPosition)) {
+            if (AboutToCollideWithAnySnake(newPosition)) {
                 Die();
             }
 
@@ -79,17 +83,23 @@ public class Snake : MonoBehaviour {
         }
     }
 
-    private bool AboutToCollideWithSelf(Vector3 newPosition)
+    private bool AboutToCollideWithAnySnake(Vector3 newPosition)
     {
-        return links.Any(x => x.transform.position == newPosition);
+        return snakes.Any(x => AreWeGoingToCollideWithOtherSnake(x, newPosition));
+    }
+
+    private bool AreWeGoingToCollideWithOtherSnake(Snake otherSnake, Vector3 newPosition)
+    {
+        return otherSnake.links.Any(x => x.transform.position == newPosition);
     }
 
     void Die() {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+        Debug.Log("AAAASDADADSDEAD");
+        snakes.Remove(this);
+        GameObject.Destroy(gameObject);
     }
 
     void Grow() {
-        Debug.Log("GROW");
         growOnNextMove = true;
     }
 
