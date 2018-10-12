@@ -23,6 +23,7 @@ public class Snake : MonoBehaviour {
         tail = head;
         head.transform.parent = transform;
 		links.Insert(0, head);
+        nextDirection = direction;
 	}
 	
 	void Update () {
