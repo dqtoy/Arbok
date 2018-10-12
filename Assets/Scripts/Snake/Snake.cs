@@ -24,21 +24,21 @@ public class Snake : MonoBehaviour {
 	}
 	
 	void Update () {
-        if (Input.GetKeyDown(KeyCode.W))
+        if (direction != Down.I && (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)))
         {
             direction = Up.I;
         }
-        if (Input.GetKeyDown(KeyCode.A))
+        if (direction != Left.I && (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)))
         {
-            direction = Left.I;
+            direction = Right.I;
         }
-        if (Input.GetKeyDown(KeyCode.S))
+        if (direction != Up.I && (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)))
         {
             direction = Down.I;
         }
-        if (Input.GetKeyDown(KeyCode.D))
+        if (direction != Right.I && (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)))
         {
-            direction = Right.I;
+            direction = Left.I;
         }
 
         elapsedTime += Time.deltaTime;
