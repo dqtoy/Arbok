@@ -25,6 +25,7 @@ public class Snake : MonoBehaviour {
     void Awake () {
         snakes.Add(this);
         head = GameObject.Instantiate(snakeLinkPrefab);
+        head.tag = "Head";
         tail = head;
         head.transform.position = transform.position;
         head.transform.parent = transform;
@@ -61,7 +62,7 @@ public class Snake : MonoBehaviour {
             
             Vector3 newPosition = head.transform.position + speed * direction.GetMoveVector();
 
-            if (AboutToCollideWithAnySnake(newPosition)) {
+            if (AboutToCollideWithSelf(newPosition)) {
                 Die();
             }
 
@@ -70,7 +71,9 @@ public class Snake : MonoBehaviour {
                 var newLink = GameObject.Instantiate(snakeLinkPrefab);
                 newLink.transform.parent = transform;
                 newLink.transform.position = newPosition;
+                head.tag = "Tail";
                 head = newLink;
+                head.tag = "Head";
                 links.Insert(0, head);
             } else {
                 var tail = links[links.Count - 1];
@@ -83,6 +86,10 @@ public class Snake : MonoBehaviour {
         }
     }
 
+	private bool AboutToCollideWithSelf(Vector3 newPosition) {
+        return links.Any(x => x.transform.position == newPosition);
+	}
+
     private bool AboutToCollideWithAnySnake(Vector3 newPosition)
     {
         return snakes.Any(x => AreWeGoingToCollideWithOtherSnake(x, newPosition));
@@ -94,7 +101,6 @@ public class Snake : MonoBehaviour {
     }
 
     void Die() {
-        Debug.Log("AAAASDADADSDEAD");
         snakes.Remove(this);
         GameObject.Destroy(gameObject);
     }
@@ -105,7 +111,7 @@ public class Snake : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.HasComponent<Wall>() || other.gameObject.HasComponent<SnakeLink>()) {
+        if(other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeLink>() && other.tag == "Tail")) {
             Die();
         }
         if (other.gameObject.HasComponent<Apple>())
