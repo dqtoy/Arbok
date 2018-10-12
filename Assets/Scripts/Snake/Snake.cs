@@ -15,7 +15,6 @@ public class Snake : MonoBehaviour {
     public float movesPerSecond = 5;
 
     GameObject head;
-    GameObject tail;
     float elapsedTime = 0;
     bool growOnNextMove = false;
     Direction direction = Up.I;
@@ -25,11 +24,10 @@ public class Snake : MonoBehaviour {
     void Awake () {
         snakes.Add(this);
         head = GameObject.Instantiate(snakeLinkPrefab);
-        head.tag = "Head";
-        tail = head;
+        head.AddComponent<SnakeHead>();
         head.transform.position = transform.position;
         head.transform.parent = transform;
-		links.Insert(0, head);
+		links.Add(head);
         nextDirection = direction;
 	}
 	
@@ -69,18 +67,21 @@ public class Snake : MonoBehaviour {
             if (growOnNextMove) {
                 growOnNextMove = false;
                 var newLink = GameObject.Instantiate(snakeLinkPrefab);
+                newLink.AddComponent<SnakeTail>();
                 newLink.transform.parent = transform;
-                newLink.transform.position = newPosition;
-                head.tag = "Tail";
-                head = newLink;
-                head.tag = "Head";
-                links.Insert(0, head);
+                newLink.transform.position = head.transform.position;
+                links.Insert(1, newLink);
+
+                head.transform.position = newPosition;
             } else {
-                var tail = links[links.Count - 1];
-                head = tail;
-                links.RemoveAt(links.Count - 1);
-                links.Insert(0, tail);
-                tail = links[links.Count - 1];
+                if (links.Count > 1) {
+                    var oldTail = links[links.Count - 1];
+                    links.RemoveAt(links.Count - 1);
+                    links.Insert(1, oldTail);
+
+                    oldTail.transform.position = head.transform.position;
+                }
+
                 head.transform.position = newPosition;
             }
         }
@@ -101,6 +102,7 @@ public class Snake : MonoBehaviour {
     }
 
     void Die() {
+        Debug.Log("DIE");
         snakes.Remove(this);
         GameObject.Destroy(gameObject);
     }
@@ -111,7 +113,7 @@ public class Snake : MonoBehaviour {
 
     void OnTriggerEnter(Collider other)
     {
-        if(other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeLink>() && other.tag == "Tail")) {
+        if(other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeLink>() && other.gameObject.HasComponent<SnakeTail>())) {
             Die();
         }
         if (other.gameObject.HasComponent<Apple>())
