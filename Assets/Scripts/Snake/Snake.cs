@@ -4,8 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.Networking;
 
-public class Snake : MonoBehaviour {
+public class Snake : NetworkBehaviour {
 
     public static List<Snake> snakes = new List<Snake>();
 
@@ -33,20 +34,20 @@ public class Snake : MonoBehaviour {
 	}
 	
 	void Update () {
-        if (direction != Down.I && controller.IsUpButtonPressed())
-        {
+        if (!isLocalPlayer) {
+            return;
+        }
+
+        if (direction != Down.I && controller.IsUpButtonPressed()) {
             nextDirection = Up.I;
         }
-        if (direction != Left.I && controller.IsRightButtonPressed())
-        {
+        if (direction != Left.I && controller.IsRightButtonPressed()) {
             nextDirection = Right.I;
         }
-        if (direction != Up.I && controller.IsDownButtonPressed())
-        {
+        if (direction != Up.I && controller.IsDownButtonPressed()) {
             nextDirection = Down.I;
         }
-        if (direction != Right.I && controller.IsLeftButtonPressed())
-        {
+        if (direction != Right.I && controller.IsLeftButtonPressed()) {
             nextDirection = Left.I;
         }
 
