@@ -42,6 +42,8 @@ GameObject:
   - component: {fileID: 114041556609338674}
   - component: {fileID: 65416862806605916}
   - component: {fileID: 65470015708864534}
+  - component: {fileID: 114038113132249058}
+  - component: {fileID: 114099429324783718}
   m_Layer: 0
   m_Name: SnakeHead
   m_TagString: Untagged
@@ -258,6 +260,38 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &114038113132249058
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1522102895919218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 372142912, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SceneId:
+    m_Value: 0
+  m_AssetId:
+    i0: 63
+    i1: 114
+    i2: 16
+    i3: 72
+    i4: 169
+    i5: 169
+    i6: 70
+    i7: 20
+    i8: 249
+    i9: 45
+    i10: 121
+    i11: 188
+    i12: 149
+    i13: 108
+    i14: 189
+    i15: 127
+  m_ServerOnly: 0
+  m_LocalPlayerAuthority: 1
 --- !u!114 &114041556609338674
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -269,6 +303,27 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 96b3db98727091649b2bda419da35039, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &114099429324783718
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1522102895919218}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -1768714887, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_TransformSyncMode: 1
+  m_SendInterval: 0.1
+  m_SyncRotationAxis: 7
+  m_RotationSyncCompression: 0
+  m_SyncSpin: 0
+  m_MovementTheshold: 0.001
+  m_VelocityThreshold: 0.0001
+  m_SnapThreshold: 5
+  m_InterpolateRotation: 1
+  m_InterpolateMovement: 1
 --- !u!135 &135157284630802494
 SphereCollider:
   m_ObjectHideFlags: 1
