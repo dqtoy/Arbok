@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class NetworkSnakeController : NetworkBehaviour, ISnakeController {
+public class NetworkSnakeController : NetworkBehaviour {
 
-    Direction nextDirection = Up.I;
-    Vector3 nextHeadPos;
+    // Vector3 nextHeadPos;
     Snake snake;
 
     // Use this for initialization
@@ -35,51 +34,48 @@ public class NetworkSnakeController : NetworkBehaviour, ISnakeController {
     }
 
     void SendNewDirection(Direction direction) {
-        nextDirection = direction;
+        snake.ChangeDirectionAtNextTick(direction);
         Debug.Log("direction: " + direction.Serialize());
-        CmdKeyDown(direction.Serialize());
-        SendHeadPosition();
+        CmdKeyDown(direction.Serialize(), snake.currentTick);
+        // SendHeadPosition();
     }
 
-    public void SendHeadPosition() {
-        CmdSendHeadPosition(snake.head.transform.position);
-    }
+    // public void SendHeadPosition() {
+    //     CmdSendHeadPosition(snake.head.transform.position);
+    // }
 
     // ==============================
     // Network
     // ==============================
     [Command]
-    private void CmdKeyDown(byte newDirection) {
-        RpcKeyDown(newDirection);
+    private void CmdKeyDown(byte newDirection, int tick) {
+        RpcKeyDown(newDirection, tick);
     }
 
     [ClientRpc]
-    public void RpcKeyDown(byte newDirection) {
+    public void RpcKeyDown(byte newDirection, int tick) {
         if (!isLocalPlayer) {
-            nextDirection = Direction.Deserialize(newDirection);
+            snake.ChangeDirectionAtTick(Direction.Deserialize(newDirection), tick);
         }
     }
 
-    [Command]
-    private void CmdSendHeadPosition(Vector3 headPosition) {
-        RpcReceiveHeadPosition(headPosition);
-    }
+    // [Command]
+    // private void CmdSendHeadPosition(Vector3 headPosition) {
+    //     RpcReceiveHeadPosition(headPosition);
+    // }
 
-    [ClientRpc]
-    public void RpcReceiveHeadPosition(Vector3 headPosition) {
-        if (!isLocalPlayer) {
-            snake.head.transform.position = headPosition;
-        }
-    }
+    // [ClientRpc]
+    // public void RpcReceiveHeadPosition(Vector3 headPosition) {
+    //     if (!isLocalPlayer) {
+    //         snake.head.transform.position = headPosition;
+    //     }
+    // }
 
     // ==============================
     // ISnakeController
     // ==============================
-    public Direction GetDirection() {
-        return nextDirection;
-    }
 
-    public Vector3 GetNextHeadPosition() {
-        return nextHeadPos;
-    }
+    // public Vector3 GetNextHeadPosition() {
+    //     return nextHeadPos;
+    // }
 }

@@ -18,62 +18,117 @@ public class Snake : NetworkBehaviour {
     public GameObject head;
     float elapsedTime = 0;
     bool growOnNextMove = false;
-    Direction direction = Up.I;
-    Direction nextDirection = Up.I;
-    ISnakeController controller;
+    Direction currentDirection = Up.I;
+    NetworkSnakeController controller;
+    public int currentTick { get; private set; }
+    Dictionary<int, Direction> snakeEvents = new Dictionary<int, Direction>();
+
+    public void ChangeDirectionAtNextTick(Direction newDirection) {
+        snakeEvents[currentTick + 1] = newDirection;
+    }
+
+    public void ChangeDirectionAtTick(Direction newDirection, int tick) {
+        var missedTick = tick <= this.currentTick;
+
+        if (missedTick) {
+            var rolledBackCount = RollbackToTick(tick - 1);
+            snakeEvents[tick] = newDirection;
+            for (int i = 0; i < rolledBackCount; i++) {
+                DoTick();
+            }
+        } else {
+            snakeEvents[tick] = newDirection;
+        }
+    }
+
+    int RollbackToTick(int tickToRollbackTo) {
+        var rolledBackCount = 0;
+        while (this.currentTick != tickToRollbackTo) {
+            RollbackTick();
+            rolledBackCount++;
+        }
+        return rolledBackCount;
+    }
+
+    void RollbackTick() {
+        if (snakeEvents.ContainsKey(currentTick)) {
+            ReverseDirection(snakeEvents[currentTick]);
+        } else {
+            ReverseDirection(currentDirection);
+        }
+        currentTick--;
+    }
+
+    void ReverseDirection(Direction direction) {
+        head.transform.position += direction.GetMoveVector() * -1;
+    }
 
     void Awake() {
+        currentTick = 0;
         all.Add(this);
         links.Add(head);
-        nextDirection = direction;
 
         controller = GetComponent<NetworkSnakeController>();
     }
 
     void Update() {
-        nextDirection = controller.GetDirection();
-
-        if (nextDirection == Down.I && direction == Up.I) {
-            nextDirection = direction;
-        }
-        if (nextDirection == Left.I && direction == Right.I) {
-            nextDirection = direction;
-        }
-        if (nextDirection == Up.I && direction == Down.I) {
-            nextDirection = direction;
-        }
-        if (nextDirection == Right.I && direction == Left.I) {
-            nextDirection = direction;
-        }
 
         elapsedTime += Time.deltaTime;
 
         if (elapsedTime > (1 / movesPerSecond)) {
             elapsedTime -= 1 / movesPerSecond;
-
-            float speed = 1.0f;
-
-            direction = nextDirection;
-
-            Vector3 newPosition = head.transform.position + speed * direction.GetMoveVector();
-
-            if (AboutToCollideWithSelf(newPosition)) {
-                Die();
-            }
-
-            if (growOnNextMove) {
-                growOnNextMove = false;
-                //CmdSpawnTail();
-            } else if (links.Count > 1) {
-                var oldTail = links[links.Count - 1];
-                links.RemoveAt(links.Count - 1);
-                links.Insert(1, oldTail);
-                oldTail.transform.position = head.transform.position;
-            }
-
-            head.transform.rotation = direction.GetHeadRotation();
-            head.transform.position = newPosition;
+            DoTick();
         }
+    }
+
+    void DoTick() {
+        currentTick++;
+
+        currentDirection = GetNewDirection();
+
+        float speed = 1.0f;
+
+        Vector3 newPosition = head.transform.position + speed * currentDirection.GetMoveVector();
+
+        if (AboutToCollideWithSelf(newPosition)) {
+            Die();
+        }
+
+        if (growOnNextMove) {
+            growOnNextMove = false;
+            //CmdSpawnTail();
+        } else if (links.Count > 1) {
+            var oldTail = links[links.Count - 1];
+            links.RemoveAt(links.Count - 1);
+            links.Insert(1, oldTail);
+            oldTail.transform.position = head.transform.position;
+        }
+
+        head.transform.rotation = currentDirection.GetHeadRotation();
+        head.transform.position = newPosition;
+    }
+
+    Direction GetNewDirection() {
+        if (!snakeEvents.ContainsKey(currentTick)) {
+            return currentDirection;
+        }
+
+        var nextDirection = snakeEvents[currentTick];
+
+        if (nextDirection == Down.I && currentDirection == Up.I) {
+            return currentDirection;
+        }
+        if (nextDirection == Left.I && currentDirection == Right.I) {
+            return currentDirection;
+        }
+        if (nextDirection == Up.I && currentDirection == Down.I) {
+            return currentDirection;
+        }
+        if (nextDirection == Right.I && currentDirection == Left.I) {
+            return currentDirection;
+        }
+
+        return nextDirection;
     }
 
     [Command] // runs only on server
