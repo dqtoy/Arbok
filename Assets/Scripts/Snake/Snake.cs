@@ -168,16 +168,17 @@ public class Snake : NetworkBehaviour {
     [Command]
     public void CmdRequestSnakePositions() {
         Debug.Log("CmdRequestSnakePositions: connectionToClient " + connectionToClient.connectionId);
-        Snake.all.ForEach(x => TargetReceiveSnakePosition(connectionToClient, x.head.transform.position, x.currentTick, x.netId));
+        Snake.all.ForEach(x => TargetReceiveSnakePosition(connectionToClient, x.head.transform.position, x.currentTick, x.currentDirection.Serialize(), x.netId));
     }
 
     [TargetRpc]
-    public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, int tick, NetworkInstanceId netId) {
+    public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, int tick, short direction, NetworkInstanceId netId) {
         if (netId == this.netId) return;
         var snakeToModify = Snake.all.Where(x => x.netId == netId).First();
         snakeToModify.head.transform.position = position;
         snakeToModify.currentTick = tick;
         snakeToModify.elapsedTime = 0;
+        snakeToModify.currentDirection = Direction.Deserialize(direction);
     }
 
     private bool AboutToCollideWithSelf(Vector3 newPosition) {
