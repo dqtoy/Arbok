@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 
 public class Snake : NetworkBehaviour {
 
-    public static List<Snake> snakes = new List<Snake>();
+    public static List<Snake> all = new List<Snake>();
 
     public GameObject snakeTailPrefab;
     public List<GameObject> links = new List<GameObject>();
@@ -23,7 +23,7 @@ public class Snake : NetworkBehaviour {
     ISnakeController controller;
 
     void Awake() {
-        snakes.Add(this);
+        all.Add(this);
         links.Add(head);
         nextDirection = direction;
 
@@ -75,18 +75,32 @@ public class Snake : NetworkBehaviour {
     }
 
     [Command] // runs only on server
-    private void CmdSpawnTail()
-    {
+    private void CmdSpawnTail() {
         GameObject newTail = Instantiate(snakeTailPrefab, head.transform.position, Quaternion.identity);
         NetworkServer.SpawnWithClientAuthority(newTail, connectionToClient);
         RpcSpawnTail(newTail);
     }
 
     [ClientRpc]
-    public void RpcSpawnTail(GameObject newTail)
-    {
+    public void RpcSpawnTail(GameObject newTail) {
         newTail.transform.parent = transform;
         links.Insert(1, newTail);
+    }
+
+    public override void OnStartLocalPlayer() {
+        CmdRequestSnakePositions();
+    }
+
+    [Command]
+    public void CmdRequestSnakePositions() {
+        Debug.Log("CmdRequestSnakePositions: connectionToClient " + connectionToClient.connectionId);
+        Snake.all.ForEach(x => TargetReceiveSnakePosition(connectionToClient, x.head.transform.position, x.netId));
+    }
+
+    [TargetRpc]
+    public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, NetworkInstanceId netId) {
+        if (netId == this.netId) return;
+        Snake.all.Where(x => x.netId == netId).First().head.transform.position = position;
     }
 
     private bool AboutToCollideWithSelf(Vector3 newPosition) {
@@ -94,7 +108,7 @@ public class Snake : NetworkBehaviour {
     }
 
     private bool AboutToCollideWithAnySnake(Vector3 newPosition) {
-        return snakes.Any(x => AreWeGoingToCollideWithOtherSnake(x, newPosition));
+        return all.Any(x => AreWeGoingToCollideWithOtherSnake(x, newPosition));
     }
 
     private bool AreWeGoingToCollideWithOtherSnake(Snake otherSnake, Vector3 newPosition) {
@@ -103,7 +117,7 @@ public class Snake : NetworkBehaviour {
 
     void Die() {
         Debug.Log("DIE");
-        snakes.Remove(this);
+        all.Remove(this);
         Destroy(gameObject);
     }
 
