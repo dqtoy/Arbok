@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.44657868, g: 0.49641263, b: 0.5748171, a: 1}
+  m_IndirectSpecularColor: {r: 0.44657898, g: 0.4964133, b: 0.5748178, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -130,7 +130,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalPosition.z
-      value: 11.16
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalRotation.x
@@ -168,7 +168,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 5.98
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalPosition.y
@@ -176,7 +176,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalPosition.z
-      value: -9.1
+      value: -9
       objectReference: {fileID: 0}
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalRotation.x
@@ -214,7 +214,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 5.98
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalPosition.y
@@ -495,7 +495,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 5.98
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalPosition.y
@@ -541,7 +541,7 @@ Prefab:
     m_Modifications:
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalPosition.x
-      value: 6.52
+      value: 6
       objectReference: {fileID: 0}
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalPosition.y
@@ -549,7 +549,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalPosition.z
-      value: 11.16
+      value: 11
       objectReference: {fileID: 0}
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalRotation.x
@@ -595,7 +595,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalPosition.z
-      value: -9.1
+      value: -9
       objectReference: {fileID: 0}
     - target: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_LocalRotation.x
@@ -664,7 +664,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1986309189}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: -822479833, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
+  m_Script: {fileID: 11500000, guid: 82389a2fae5e58040a0523a1ac9a1cb5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_NetworkPort: 7777
@@ -676,14 +676,13 @@ MonoBehaviour:
   m_ScriptCRCCheck: 1
   m_MaxDelay: 0.01
   m_LogLevel: 2
-  m_PlayerPrefab: {fileID: 1999735503848270, guid: 55d4dbd0342b6471bade958d897adf4d,
+  m_PlayerPrefab: {fileID: 1999735503848270, guid: 3d478012f335ae04b950c4246f5ce5f7,
     type: 2}
-  m_AutoCreatePlayer: 1
+  m_AutoCreatePlayer: 0
   m_PlayerSpawnMethod: 0
   m_OfflineScene: 
   m_OnlineScene: 
-  m_SpawnPrefabs:
-  - {fileID: 1061850045364242, guid: 596fe874a6272ce43ad4018b9b7e2753, type: 2}
+  m_SpawnPrefabs: []
   m_CustomConfig: 0
   m_MaxConnections: 4
   m_ConnectionConfig:
