@@ -334,12 +334,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Target: {fileID: 4848136547368594}
   m_ChildIndex: 0
-  m_SendInterval: 0
+  m_SendInterval: 0.033333335
   m_SyncRotationAxis: 7
   m_RotationSyncCompression: 0
   m_MovementThreshold: 0.001
-  m_InterpolateRotation: 0.5
-  m_InterpolateMovement: 0.5
+  m_InterpolateRotation: 0
+  m_InterpolateMovement: 0
 --- !u!114 &114233895364493278
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -376,7 +376,7 @@ MonoBehaviour:
   snakeTailPrefab: {fileID: 1061850045364242, guid: 596fe874a6272ce43ad4018b9b7e2753,
     type: 2}
   links: []
-  movesPerSecond: 3
+  movesPerSecond: 5
   head: {fileID: 1296976921152398}
   controller: {fileID: 114250507035605424}
 --- !u!114 &114654670206219874

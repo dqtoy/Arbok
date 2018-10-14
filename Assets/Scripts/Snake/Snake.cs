@@ -29,7 +29,9 @@ public class Snake : NetworkBehaviour {
     }
 
     void Update() {
-        if (isLocalPlayer) return;
+        if (!isLocalPlayer) {
+            return;
+        }
 
         if (direction != Down.I && controller.IsUpButtonPressed()) {
             nextDirection = Up.I;
@@ -61,10 +63,13 @@ public class Snake : NetworkBehaviour {
 
             if (growOnNextMove) {
                 growOnNextMove = false;
-                var newLink = GameObject.Instantiate(snakeTailPrefab);
-                newLink.transform.parent = transform;
-                newLink.transform.position = head.transform.position;
-                links.Insert(1, newLink);
+                //var newLink = GameObject.Instantiate(snakeTailPrefab);
+
+                SpawnObject();
+
+                //newTail.transform.parent = transform;
+                //newTail.transform.position = head.transform.position;
+                //links.Insert(1, newTail);
 
             } else if (links.Count > 1) {
                 var oldTail = links[links.Count - 1];
@@ -76,6 +81,22 @@ public class Snake : NetworkBehaviour {
             head.transform.rotation = direction.GetHeadRotation();
             head.transform.position = newPosition;
         }
+    }
+
+    GameObject newTail;
+    [Client] // called only on client
+    public void SpawnObject()
+    {
+        CmdSpawn();
+        newTail.transform.position = head.transform.position;
+        links.Insert(1, newTail);
+    }
+
+    [Command] // runs only on server
+    private void CmdSpawn()
+    {
+        newTail = Instantiate(snakeTailPrefab, Vector3.zero, Quaternion.identity);
+        NetworkServer.Spawn(newTail);
     }
 
     private bool AboutToCollideWithSelf(Vector3 newPosition) {
@@ -93,7 +114,7 @@ public class Snake : NetworkBehaviour {
     void Die() {
         Debug.Log("DIE");
         snakes.Remove(this);
-        GameObject.Destroy(gameObject);
+        Destroy(gameObject);
     }
 
     void Grow() {
@@ -101,9 +122,9 @@ public class Snake : NetworkBehaviour {
     }
 
     void OnTriggerEnter(Collider other) {
-        if (other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeTail>())) {
-            Die();
-        }
+        //if (other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeTail>())) {
+        //    Die();
+        //}
         if (other.gameObject.HasComponent<Apple>()) {
             Destroy(other.gameObject);
             Grow();
