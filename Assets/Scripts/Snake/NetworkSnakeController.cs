@@ -21,17 +21,28 @@ public class NetworkSnakeController : NetworkBehaviour, ISnakeController {
         }
 
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) {
-            CmdKeyDown(Up.I.Serialize());
+            SendNewDirection(Up.I);
         }
         if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) {
-            CmdKeyDown(Right.I.Serialize());
+            SendNewDirection(Right.I);
         }
         if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) {
-            CmdKeyDown(Down.I.Serialize());
+            SendNewDirection(Down.I);
         }
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) {
-            CmdKeyDown(Left.I.Serialize());
+            SendNewDirection(Left.I);
         }
+    }
+
+    void SendNewDirection(Direction direction) {
+        nextDirection = direction;
+        Debug.Log("direction: " + direction.Serialize());
+        CmdKeyDown(direction.Serialize());
+        SendHeadPosition();
+    }
+
+    public void SendHeadPosition() {
+        CmdSendHeadPosition(snake.head.transform.position);
     }
 
     // ==============================
@@ -44,7 +55,21 @@ public class NetworkSnakeController : NetworkBehaviour, ISnakeController {
 
     [ClientRpc]
     public void RpcKeyDown(byte newDirection) {
-        nextDirection = Direction.Deserialize(newDirection);
+        if (!isLocalPlayer) {
+            nextDirection = Direction.Deserialize(newDirection);
+        }
+    }
+
+    [Command]
+    private void CmdSendHeadPosition(Vector3 headPosition) {
+        RpcReceiveHeadPosition(headPosition);
+    }
+
+    [ClientRpc]
+    public void RpcReceiveHeadPosition(Vector3 headPosition) {
+        if (!isLocalPlayer) {
+            snake.head.transform.position = headPosition;
+        }
     }
 
     // ==============================
