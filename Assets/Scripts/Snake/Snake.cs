@@ -31,10 +31,6 @@ public class Snake : NetworkBehaviour {
     }
 
     void Update() {
-        if (!isLocalPlayer) {
-            return;
-        }
-
         if (direction != Down.I && controller.IsUpButtonPressed()) {
             nextDirection = Up.I;
         }
@@ -65,15 +61,7 @@ public class Snake : NetworkBehaviour {
 
             if (growOnNextMove) {
                 growOnNextMove = false;
-                //var newLink = GameObject.Instantiate(snakeTailPrefab);
-
-                //SpawnTail();
-                CmdSpawnTail();
-
-                //newTail.transform.parent = transform;
-                //newTail.transform.position = head.transform.position;
-                //links.Insert(1, newTail);
-
+                //CmdSpawnTail();
             } else if (links.Count > 1) {
                 var oldTail = links[links.Count - 1];
                 links.RemoveAt(links.Count - 1);
