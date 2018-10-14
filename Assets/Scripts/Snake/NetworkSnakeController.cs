@@ -3,36 +3,34 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class NetworkSnakeController : NetworkBehaviour, ISnakeController
-{
+public class NetworkSnakeController : NetworkBehaviour, ISnakeController {
 
     Direction nextDirection = Up.I;
+    Vector3 nextHeadPos;
+    Snake snake;
 
     // Use this for initialization
-    void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-        if(!isLocalPlayer) {
-            return;
-        }	
+    void Start() {
+        snake = GetComponent<Snake>();
+    }
 
-        if(Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) {
-            CmdKeyDownUp();
+    // Update is called once per frame
+    void Update() {
+        if (!isLocalPlayer) {
+            return;
         }
-        if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
-        {
-            CmdKeyDownRight();
+
+        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) {
+            CmdKeyDown(Up.I.Serialize());
         }
-        if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
-        {
-            CmdKeyDownDown();
+        if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) {
+            CmdKeyDown(Right.I.Serialize());
         }
-        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
-        {
-            CmdKeyDownLeft();
+        if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) {
+            CmdKeyDown(Down.I.Serialize());
+        }
+        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) {
+            CmdKeyDown(Left.I.Serialize());
         }
     }
 
@@ -40,74 +38,23 @@ public class NetworkSnakeController : NetworkBehaviour, ISnakeController
     // Network
     // ==============================
     [Command]
-    private void CmdKeyDownUp()
-    {
-        RpcKeyDownUp();
+    private void CmdKeyDown(byte newDirection) {
+        RpcKeyDown(newDirection);
     }
 
     [ClientRpc]
-    public void RpcKeyDownUp()
-    {
-        nextDirection = Up.I;
+    public void RpcKeyDown(byte newDirection) {
+        nextDirection = Direction.Deserialize(newDirection);
     }
-
-    [Command]
-    private void CmdKeyDownDown()
-    {
-        RpcKeyDownDown();
-    }
-
-    [ClientRpc]
-    public void RpcKeyDownDown()
-    {
-        nextDirection = Down.I;
-    }
-
-    [Command]
-    private void CmdKeyDownLeft()
-    {
-        RpcKeyDownLeft();
-    }
-
-    [ClientRpc]
-    public void RpcKeyDownLeft()
-    {
-        nextDirection = Left.I;
-    }
-
-    [Command]
-    private void CmdKeyDownRight()
-    {
-        RpcKeyDownRight();
-    }
-
-    [ClientRpc]
-    public void RpcKeyDownRight()
-    {
-        nextDirection = Right.I;
-    }
-
 
     // ==============================
     // ISnakeController
     // ==============================
-    public bool IsDownButtonPressed()
-    {
-        return nextDirection == Down.I;
+    public Direction GetDirection() {
+        return nextDirection;
     }
 
-    public bool IsLeftButtonPressed()
-    {
-        return nextDirection == Left.I;
-    }
-
-    public bool IsRightButtonPressed()
-    {
-        return nextDirection == Right.I;
-    }
-
-    public bool IsUpButtonPressed()
-    {
-        return nextDirection == Up.I;
+    public Vector3 GetNextHeadPosition() {
+        return nextHeadPos;
     }
 }

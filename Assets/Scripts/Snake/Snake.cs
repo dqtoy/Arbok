@@ -31,17 +31,19 @@ public class Snake : NetworkBehaviour {
     }
 
     void Update() {
-        if (direction != Down.I && controller.IsUpButtonPressed()) {
-            nextDirection = Up.I;
+        nextDirection = controller.GetDirection();
+
+        if (nextDirection == Down.I && direction == Up.I) {
+            nextDirection = direction;
         }
-        if (direction != Left.I && controller.IsRightButtonPressed()) {
-            nextDirection = Right.I;
+        if (nextDirection == Left.I && direction == Right.I) {
+            nextDirection = direction;
         }
-        if (direction != Up.I && controller.IsDownButtonPressed()) {
-            nextDirection = Down.I;
+        if (nextDirection == Up.I && direction == Down.I) {
+            nextDirection = direction;
         }
-        if (direction != Right.I && controller.IsLeftButtonPressed()) {
-            nextDirection = Left.I;
+        if (nextDirection == Right.I && direction == Left.I) {
+            nextDirection = direction;
         }
 
         elapsedTime += Time.deltaTime;
