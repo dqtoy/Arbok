@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ComputerSnakeController : ISnakeController {
+public class ComputerSnakeController : MonoBehaviour, ISnakeController {
 
 	Direction nextDirection = Up.I;
 
@@ -29,22 +29,22 @@ public class ComputerSnakeController : ISnakeController {
 		StartCoroutine(Foo());
 	}
 
-    public override bool IsDownButtonPressed()
+    public bool IsDownButtonPressed()
     {
         return nextDirection == Down.I;
     }
 
-    public override bool IsLeftButtonPressed()
+    public bool IsLeftButtonPressed()
     {
         return nextDirection == Left.I;
     }
 
-    public override bool IsRightButtonPressed()
+    public bool IsRightButtonPressed()
     {
         return nextDirection == Right.I;
     }
 
-    public override bool IsUpButtonPressed()
+    public bool IsUpButtonPressed()
     {
         return nextDirection == Up.I;
     }

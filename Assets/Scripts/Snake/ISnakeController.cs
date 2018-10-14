@@ -1,9 +1,9 @@
 using UnityEngine;
 
-public abstract class ISnakeController : MonoBehaviour
+public interface ISnakeController
 {
-    public abstract bool IsUpButtonPressed();
-    public abstract bool IsRightButtonPressed();
-    public abstract bool IsDownButtonPressed();
-    public abstract bool IsLeftButtonPressed();
+    bool IsUpButtonPressed();
+    bool IsRightButtonPressed();
+    bool IsDownButtonPressed();
+    bool IsLeftButtonPressed();
 }

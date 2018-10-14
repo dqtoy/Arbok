@@ -3,7 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HumanSnakeController : ISnakeController {
+public class HumanSnakeController : MonoBehaviour, ISnakeController
+{
     // Use this for initialization
     void Start () {
 		
@@ -14,22 +15,22 @@ public class HumanSnakeController : ISnakeController {
 		
 	}
 
-    public override bool IsUpButtonPressed()
+    public bool IsUpButtonPressed()
     {
         return Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow);
     }
 
-    public override bool IsRightButtonPressed()
+    public bool IsRightButtonPressed()
     {
         return Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow);
     }
 
-    public override bool IsDownButtonPressed()
+    public bool IsDownButtonPressed()
     {
         return Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow);
     }
 
-    public override bool IsLeftButtonPressed()
+    public bool IsLeftButtonPressed()
     {
         return Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow);
     }

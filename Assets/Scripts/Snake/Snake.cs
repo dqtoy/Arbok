@@ -20,12 +20,14 @@ public class Snake : NetworkBehaviour {
     bool growOnNextMove = false;
     Direction direction = Up.I;
     Direction nextDirection = Up.I;
-    public ISnakeController controller;
+    ISnakeController controller;
 
     void Awake() {
         snakes.Add(this);
         links.Add(head);
         nextDirection = direction;
+
+        controller = GetComponent<NetworkSnakeController>();
     }
 
     void Update() {
