@@ -3,40 +3,33 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.Networking;
+using UnityEngine.SceneManagement;
 
 public class Snake : NetworkBehaviour {
 
     public static List<Snake> snakes = new List<Snake>();
 
-    public GameObject snakeHeadPrefab;
     public GameObject snakeTailPrefab;
     public List<GameObject> links = new List<GameObject>();
-    public Material SnakeHeadMaterial;
 
     public float movesPerSecond = 5;
 
-    GameObject head;
+    public GameObject head;
     float elapsedTime = 0;
     bool growOnNextMove = false;
     Direction direction = Up.I;
     Direction nextDirection = Up.I;
     public ISnakeController controller;
 
-    void Awake () {
+    void Awake() {
         snakes.Add(this);
-        head = GameObject.Instantiate(snakeHeadPrefab);
-        head.transform.position = transform.position;
-        head.transform.parent = transform;
-		links.Add(head);
+        links.Add(head);
         nextDirection = direction;
-	}
-	
-	void Update () {
-        if (!isLocalPlayer) {
-            return;
-        }
+    }
+
+    void Update() {
+        if (isLocalPlayer) return;
 
         if (direction != Down.I && controller.IsUpButtonPressed()) {
             nextDirection = Up.I;
@@ -53,13 +46,13 @@ public class Snake : NetworkBehaviour {
 
         elapsedTime += Time.deltaTime;
 
-        if(elapsedTime > (1 / movesPerSecond)) {
+        if (elapsedTime > (1 / movesPerSecond)) {
             elapsedTime -= 1 / movesPerSecond;
 
             float speed = 1.0f;
 
             direction = nextDirection;
-            
+
             Vector3 newPosition = head.transform.position + speed * direction.GetMoveVector();
 
             if (AboutToCollideWithSelf(newPosition)) {
@@ -85,17 +78,15 @@ public class Snake : NetworkBehaviour {
         }
     }
 
-	private bool AboutToCollideWithSelf(Vector3 newPosition) {
+    private bool AboutToCollideWithSelf(Vector3 newPosition) {
         return links.Any(x => x.transform.position == newPosition);
-	}
+    }
 
-    private bool AboutToCollideWithAnySnake(Vector3 newPosition)
-    {
+    private bool AboutToCollideWithAnySnake(Vector3 newPosition) {
         return snakes.Any(x => AreWeGoingToCollideWithOtherSnake(x, newPosition));
     }
 
-    private bool AreWeGoingToCollideWithOtherSnake(Snake otherSnake, Vector3 newPosition)
-    {
+    private bool AreWeGoingToCollideWithOtherSnake(Snake otherSnake, Vector3 newPosition) {
         return otherSnake.links.Any(x => x.transform.position == newPosition);
     }
 
@@ -109,13 +100,11 @@ public class Snake : NetworkBehaviour {
         growOnNextMove = true;
     }
 
-    void OnTriggerEnter(Collider other)
-    {
-        if(other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeTail>())) {
+    void OnTriggerEnter(Collider other) {
+        if (other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeTail>())) {
             Die();
         }
-        if (other.gameObject.HasComponent<Apple>())
-        {
+        if (other.gameObject.HasComponent<Apple>()) {
             Destroy(other.gameObject);
             Grow();
         }
