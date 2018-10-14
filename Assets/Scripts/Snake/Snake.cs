@@ -65,7 +65,8 @@ public class Snake : NetworkBehaviour {
                 growOnNextMove = false;
                 //var newLink = GameObject.Instantiate(snakeTailPrefab);
 
-                SpawnObject();
+                //SpawnTail();
+                CmdSpawnTail();
 
                 //newTail.transform.parent = transform;
                 //newTail.transform.position = head.transform.position;
@@ -83,20 +84,19 @@ public class Snake : NetworkBehaviour {
         }
     }
 
-    GameObject newTail;
-    [Client] // called only on client
-    public void SpawnObject()
+    [Command] // runs only on server
+    private void CmdSpawnTail()
     {
-        CmdSpawn();
-        newTail.transform.position = head.transform.position;
-        links.Insert(1, newTail);
+        GameObject newTail = Instantiate(snakeTailPrefab, head.transform.position, Quaternion.identity);
+        NetworkServer.SpawnWithClientAuthority(newTail, connectionToClient);
+        RpcSpawnTail(newTail);
     }
 
-    [Command] // runs only on server
-    private void CmdSpawn()
+    [ClientRpc]
+    public void RpcSpawnTail(GameObject newTail)
     {
-        newTail = Instantiate(snakeTailPrefab, Vector3.zero, Quaternion.identity);
-        NetworkServer.Spawn(newTail);
+        newTail.transform.parent = transform;
+        links.Insert(1, newTail);
     }
 
     private bool AboutToCollideWithSelf(Vector3 newPosition) {
