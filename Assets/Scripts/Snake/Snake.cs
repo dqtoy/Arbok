@@ -5,6 +5,17 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
+
+public class SnakeEvent {
+    public Direction previousDirection;
+    public Direction newDirection;
+
+    public SnakeEvent(Direction previousDirection, Direction newDirection) {
+        this.previousDirection = previousDirection;
+        this.newDirection = newDirection;
+    }
+}
 
 public class Snake : NetworkBehaviour {
 
@@ -21,10 +32,11 @@ public class Snake : NetworkBehaviour {
     Direction currentDirection = Up.I;
     NetworkSnakeController controller;
     public int currentTick { get; private set; }
-    Dictionary<int, Direction> snakeEvents = new Dictionary<int, Direction>();
+    public Dictionary<int, SnakeEvent> snakeEvents = new Dictionary<int, SnakeEvent>();
+    public Text tickUI;
 
     public void ChangeDirectionAtNextTick(Direction newDirection) {
-        snakeEvents[currentTick + 1] = newDirection;
+        snakeEvents[currentTick + 1] = new SnakeEvent(currentDirection, newDirection);
     }
 
     public void ChangeDirectionAtTick(Direction newDirection, int tick) {
@@ -32,13 +44,14 @@ public class Snake : NetworkBehaviour {
 
         if (missedTick) {
             var rolledBackCount = RollbackToTick(tick - 1);
-            snakeEvents[tick] = newDirection;
+            snakeEvents[tick] = new SnakeEvent(currentDirection, newDirection);
             for (int i = 0; i < rolledBackCount; i++) {
                 DoTick();
             }
         } else {
-            snakeEvents[tick] = newDirection;
+            snakeEvents[tick] = new SnakeEvent(currentDirection, newDirection);
         }
+        UpdateTickText();
     }
 
     int RollbackToTick(int tickToRollbackTo) {
@@ -51,15 +64,14 @@ public class Snake : NetworkBehaviour {
     }
 
     void RollbackTick() {
+        MoveBack(currentDirection);
         if (snakeEvents.ContainsKey(currentTick)) {
-            ReverseDirection(snakeEvents[currentTick]);
-        } else {
-            ReverseDirection(currentDirection);
+            currentDirection = snakeEvents[currentTick].previousDirection;
         }
         currentTick--;
     }
 
-    void ReverseDirection(Direction direction) {
+    void MoveBack(Direction direction) {
         head.transform.position += direction.GetMoveVector() * -1;
     }
 
@@ -81,8 +93,13 @@ public class Snake : NetworkBehaviour {
         }
     }
 
+    void UpdateTickText() {
+        tickUI.text = currentTick.ToString();
+    }
+
     void DoTick() {
         currentTick++;
+        UpdateTickText();
 
         currentDirection = GetNewDirection();
 
@@ -113,7 +130,7 @@ public class Snake : NetworkBehaviour {
             return currentDirection;
         }
 
-        var nextDirection = snakeEvents[currentTick];
+        var nextDirection = snakeEvents[currentTick].newDirection;
 
         if (nextDirection == Down.I && currentDirection == Up.I) {
             return currentDirection;
@@ -151,13 +168,16 @@ public class Snake : NetworkBehaviour {
     [Command]
     public void CmdRequestSnakePositions() {
         Debug.Log("CmdRequestSnakePositions: connectionToClient " + connectionToClient.connectionId);
-        Snake.all.ForEach(x => TargetReceiveSnakePosition(connectionToClient, x.head.transform.position, x.netId));
+        Snake.all.ForEach(x => TargetReceiveSnakePosition(connectionToClient, x.head.transform.position, x.currentTick, x.netId));
     }
 
     [TargetRpc]
-    public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, NetworkInstanceId netId) {
+    public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, int tick, NetworkInstanceId netId) {
         if (netId == this.netId) return;
-        Snake.all.Where(x => x.netId == netId).First().head.transform.position = position;
+        var snakeToModify = Snake.all.Where(x => x.netId == netId).First();
+        snakeToModify.head.transform.position = position;
+        snakeToModify.currentTick = tick;
+        snakeToModify.elapsedTime = 0;
     }
 
     private bool AboutToCollideWithSelf(Vector3 newPosition) {
@@ -191,4 +211,29 @@ public class Snake : NetworkBehaviour {
             Grow();
         }
     }
+
+    // public List<int> _keys = new List<int> { };
+    // public List<short> _values = new List<short> { };
+
+    // public void OnBeforeSerialize() {
+    //     _keys.Clear();
+    //     _values.Clear();
+
+    //     foreach (var kvp in snakeEvents) {
+    //         _keys.Add(kvp.Key);
+    //         _values.Add(kvp.Value.Serialize());
+    //     }
+    // }
+
+    // public void OnAfterDeserialize() {
+    //     snakeEvents = new Dictionary<int, Direction>();
+
+    //     for (int i = 0; i != Math.Min(_keys.Count, _values.Count); i++)
+    //         snakeEvents.Add(_keys[i], Direction.Deserialize(_values[i]));
+    // }
+
+    // void OnGUI() {
+    //     foreach (var kvp in snakeEvents)
+    //         GUILayout.Label("Key: " + kvp.Key + " value: " + kvp.Value);
+    // }
 }

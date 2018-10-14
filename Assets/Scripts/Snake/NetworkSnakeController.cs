@@ -36,7 +36,7 @@ public class NetworkSnakeController : NetworkBehaviour {
     void SendNewDirection(Direction direction) {
         snake.ChangeDirectionAtNextTick(direction);
         Debug.Log("direction: " + direction.Serialize());
-        CmdKeyDown(direction.Serialize(), snake.currentTick);
+        CmdKeyDown(direction.Serialize(), snake.currentTick + 1);
         // SendHeadPosition();
     }
 
