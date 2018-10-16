@@ -7,13 +7,82 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class SnakeEvent {
-    public Direction previousDirection;
+public class SnakeEvents {
+    Dictionary<int, SnakeCompoundEvent> dict = new Dictionary<int, SnakeCompoundEvent>();
+
+    public void AddOrReplaceAtTick(int tick, SnakeEvent snakeEvent) {
+        if (dict.ContainsKey(tick) == false) {
+            dict[tick] = new SnakeCompoundEvent();
+        }
+        dict[tick].AddOrReplaceEvent(snakeEvent);
+    }
+
+    public bool HasEventAtTick(int tick) {
+        return dict.ContainsKey(tick);
+    }
+
+    public void ExecuteEventsAtTickIfAny(int tick, Snake snake) {
+        if (dict.ContainsKey(tick)) {
+            dict[tick].Execute(snake);
+        }
+    }
+
+    public void ReverseEventsAtTickIfAny(int tick, Snake snake) {
+        if (dict.ContainsKey(tick)) {
+            dict[tick].Reverse(snake);
+        }
+    }
+}
+
+public class SnakeCompoundEvent : Dictionary<Type, SnakeEvent> {
+    Dictionary<Type, SnakeEvent> events = new Dictionary<Type, SnakeEvent>();
+
+    public void AddOrReplaceEvent(SnakeEvent snakeEvent) {
+        events[snakeEvent.GetType()] = snakeEvent;
+    }
+
+    public void Execute(Snake snake) {
+        foreach (var kvp in events) {
+            kvp.Value.Execute(snake);
+        }
+    }
+
+    public void Reverse(Snake snake) {
+        foreach (var kvp in events) {
+            kvp.Value.Reverse(snake);
+        }
+    }
+}
+
+public interface SnakeEvent {
+    void Execute(Snake snake);
+    void Reverse(Snake snake);
+}
+
+public class SnakeChangeDirectionEvent : SnakeEvent {
+    public Direction previousDirection = DummyDirection.I;
     public Direction newDirection;
 
-    public SnakeEvent(Direction previousDirection, Direction newDirection) {
-        this.previousDirection = previousDirection;
+    public SnakeChangeDirectionEvent(Direction newDirection) {
         this.newDirection = newDirection;
+    }
+
+    public void Execute(Snake snake) {
+        previousDirection = snake.currentDirection;
+
+        if ((newDirection == Down.I && snake.currentDirection == Up.I) ||
+            (newDirection == Left.I && snake.currentDirection == Right.I) ||
+            (newDirection == Up.I && snake.currentDirection == Down.I) ||
+            (newDirection == Right.I && snake.currentDirection == Left.I)) {
+
+            return;
+        }
+
+        snake.currentDirection = newDirection;
+    }
+
+    public void Reverse(Snake snake) {
+        snake.currentDirection = previousDirection;
     }
 }
 
@@ -29,14 +98,14 @@ public class Snake : NetworkBehaviour {
     public GameObject head;
     float elapsedTime = 0;
     bool growOnNextMove = false;
-    Direction currentDirection = Up.I;
+    public Direction currentDirection = Up.I;
     NetworkSnakeController controller;
     public int currentTick { get; private set; }
-    public Dictionary<int, SnakeEvent> snakeEvents = new Dictionary<int, SnakeEvent>();
+    public SnakeEvents snakeEvents = new SnakeEvents();
     public Text tickUI;
 
     public void ChangeDirectionAtNextTick(Direction newDirection) {
-        snakeEvents[currentTick + 1] = new SnakeEvent(currentDirection, newDirection);
+        snakeEvents.AddOrReplaceAtTick(currentTick + 1, new SnakeChangeDirectionEvent(newDirection));
     }
 
     public void ChangeDirectionAtTick(Direction newDirection, int tick) {
@@ -44,30 +113,31 @@ public class Snake : NetworkBehaviour {
 
         if (missedTick) {
             var rolledBackCount = RollbackToTick(tick - 1);
-            snakeEvents[tick] = new SnakeEvent(currentDirection, newDirection);
+            snakeEvents.AddOrReplaceAtTick(tick, new SnakeChangeDirectionEvent(newDirection));
             for (int i = 0; i < rolledBackCount; i++) {
                 DoTick();
             }
         } else {
-            snakeEvents[tick] = new SnakeEvent(currentDirection, newDirection);
+            snakeEvents.AddOrReplaceAtTick(tick, new SnakeChangeDirectionEvent(newDirection));
         }
+
         UpdateTickText();
     }
 
     int RollbackToTick(int tickToRollbackTo) {
         var rolledBackCount = 0;
+
         while (this.currentTick != tickToRollbackTo) {
             RollbackTick();
             rolledBackCount++;
         }
+
         return rolledBackCount;
     }
 
     void RollbackTick() {
         MoveBack(currentDirection);
-        if (snakeEvents.ContainsKey(currentTick)) {
-            currentDirection = snakeEvents[currentTick].previousDirection;
-        }
+        snakeEvents.ReverseEventsAtTickIfAny(currentTick, this);
         currentTick--;
     }
 
@@ -84,7 +154,6 @@ public class Snake : NetworkBehaviour {
     }
 
     void Update() {
-
         elapsedTime += Time.deltaTime;
 
         if (elapsedTime > (1 / movesPerSecond)) {
@@ -101,7 +170,7 @@ public class Snake : NetworkBehaviour {
         currentTick++;
         UpdateTickText();
 
-        currentDirection = GetNewDirection();
+        snakeEvents.ExecuteEventsAtTickIfAny(currentTick, this);
 
         float speed = 1.0f;
 
@@ -125,30 +194,7 @@ public class Snake : NetworkBehaviour {
         head.transform.position = newPosition;
     }
 
-    Direction GetNewDirection() {
-        if (!snakeEvents.ContainsKey(currentTick)) {
-            return currentDirection;
-        }
-
-        var nextDirection = snakeEvents[currentTick].newDirection;
-
-        if (nextDirection == Down.I && currentDirection == Up.I) {
-            return currentDirection;
-        }
-        if (nextDirection == Left.I && currentDirection == Right.I) {
-            return currentDirection;
-        }
-        if (nextDirection == Up.I && currentDirection == Down.I) {
-            return currentDirection;
-        }
-        if (nextDirection == Right.I && currentDirection == Left.I) {
-            return currentDirection;
-        }
-
-        return nextDirection;
-    }
-
-    [Command] // runs only on server
+    [Command]
     private void CmdSpawnTail() {
         GameObject newTail = Instantiate(snakeTailPrefab, head.transform.position, Quaternion.identity);
         NetworkServer.SpawnWithClientAuthority(newTail, connectionToClient);
@@ -201,6 +247,7 @@ public class Snake : NetworkBehaviour {
 
     void Grow() {
         growOnNextMove = true;
+        // snakeEvents[currentTick + 1] = ;
     }
 
     void OnTriggerEnter(Collider other) {
@@ -212,29 +259,4 @@ public class Snake : NetworkBehaviour {
             Grow();
         }
     }
-
-    // public List<int> _keys = new List<int> { };
-    // public List<short> _values = new List<short> { };
-
-    // public void OnBeforeSerialize() {
-    //     _keys.Clear();
-    //     _values.Clear();
-
-    //     foreach (var kvp in snakeEvents) {
-    //         _keys.Add(kvp.Key);
-    //         _values.Add(kvp.Value.Serialize());
-    //     }
-    // }
-
-    // public void OnAfterDeserialize() {
-    //     snakeEvents = new Dictionary<int, Direction>();
-
-    //     for (int i = 0; i != Math.Min(_keys.Count, _values.Count); i++)
-    //         snakeEvents.Add(_keys[i], Direction.Deserialize(_values[i]));
-    // }
-
-    // void OnGUI() {
-    //     foreach (var kvp in snakeEvents)
-    //         GUILayout.Label("Key: " + kvp.Key + " value: " + kvp.Value);
-    // }
 }

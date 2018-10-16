@@ -111,6 +111,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4939979279394010}
   - component: {fileID: 114350614183712696}
+  - component: {fileID: 114998642669381396}
   - component: {fileID: 114869938117225824}
   - component: {fileID: 54156907501775370}
   - component: {fileID: 114654670206219874}
@@ -483,6 +484,19 @@ MonoBehaviour:
     m_VerticalOverflow: 1
     m_LineSpacing: 1
   m_Text: 0
+--- !u!114 &114998642669381396
+MonoBehaviour:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1999735503848270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 197ec8a072c599648bd01c0d8fb7c852, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  snake: {fileID: 114350614183712696}
+  keys: []
 --- !u!135 &135280331152753486
 SphereCollider:
   m_ObjectHideFlags: 1
