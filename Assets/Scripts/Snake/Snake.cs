@@ -86,6 +86,17 @@ public class SnakeChangeDirectionEvent : SnakeEvent {
     }
 }
 
+public class SnakeGrowEvent : SnakeEvent {
+
+    public void Execute(Snake snake) {
+        var newTail = GameObject.Instantiate(snake.snakeTailPrefab, snake.head.transform.position, Quaternion.identity);
+        newTail.transform.parent = snake.transform;
+        snake.links.Insert(1, newTail);
+    }
+
+    public void Reverse(Snake snake) { }
+}
+
 public class Snake : NetworkBehaviour {
 
     public static List<Snake> all = new List<Snake>();
@@ -97,7 +108,6 @@ public class Snake : NetworkBehaviour {
 
     public GameObject head;
     float elapsedTime = 0;
-    bool growOnNextMove = false;
     public Direction currentDirection = Up.I;
     NetworkSnakeController controller;
     public int currentTick { get; private set; }
@@ -148,6 +158,7 @@ public class Snake : NetworkBehaviour {
     void Awake() {
         currentTick = 0;
         all.Add(this);
+        // TODO Dont put head into links
         links.Add(head);
 
         controller = GetComponent<NetworkSnakeController>();
@@ -180,10 +191,7 @@ public class Snake : NetworkBehaviour {
             Die();
         }
 
-        if (growOnNextMove) {
-            growOnNextMove = false;
-            //CmdSpawnTail();
-        } else if (links.Count > 1) {
+        if (links.Count > 1) {
             var oldTail = links[links.Count - 1];
             links.RemoveAt(links.Count - 1);
             links.Insert(1, oldTail);
@@ -194,18 +202,18 @@ public class Snake : NetworkBehaviour {
         head.transform.position = newPosition;
     }
 
-    [Command]
-    private void CmdSpawnTail() {
-        GameObject newTail = Instantiate(snakeTailPrefab, head.transform.position, Quaternion.identity);
-        NetworkServer.SpawnWithClientAuthority(newTail, connectionToClient);
-        RpcSpawnTail(newTail);
-    }
+    // [Command]
+    // private void CmdSpawnTail() {
+    //     GameObject newTail = Instantiate(snakeTailPrefab, head.transform.position, Quaternion.identity);
+    //     NetworkServer.SpawnWithClientAuthority(newTail, connectionToClient);
+    //     RpcSpawnTail(newTail);
+    // }
 
-    [ClientRpc]
-    public void RpcSpawnTail(GameObject newTail) {
-        newTail.transform.parent = transform;
-        links.Insert(1, newTail);
-    }
+    // [ClientRpc]
+    // public void RpcSpawnTail(GameObject newTail) {
+    //     newTail.transform.parent = transform;
+    //     links.Insert(1, newTail);
+    // }
 
     public override void OnStartLocalPlayer() {
         CmdRequestSnakePositions();
@@ -246,8 +254,7 @@ public class Snake : NetworkBehaviour {
     }
 
     void Grow() {
-        growOnNextMove = true;
-        // snakeEvents[currentTick + 1] = ;
+        snakeEvents.AddOrReplaceAtTick(currentTick + 1, new SnakeGrowEvent());
     }
 
     void OnTriggerEnter(Collider other) {
@@ -255,8 +262,12 @@ public class Snake : NetworkBehaviour {
         //    Die();
         //}
         if (other.gameObject.HasComponent<Apple>()) {
-            Destroy(other.gameObject);
-            Grow();
+            OnHeadMeetApple(other.gameObject);
         }
+    }
+
+    void OnHeadMeetApple(GameObject apple) {
+        Destroy(apple);
+        Grow();
     }
 }
