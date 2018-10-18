@@ -91,7 +91,7 @@ public class SnakeGrowEvent : SnakeEvent {
     public void Execute(Snake snake) {
         var newTail = GameObject.Instantiate(snake.snakeTailPrefab, snake.head.transform.position, Quaternion.identity);
         newTail.transform.parent = snake.transform;
-        snake.links.Insert(1, newTail);
+        snake.links.Insert(0, newTail);
     }
 
     public void Reverse(Snake snake) { }
@@ -158,8 +158,6 @@ public class Snake : NetworkBehaviour {
     void Awake() {
         currentTick = 0;
         all.Add(this);
-        // TODO Dont put head into links
-        links.Add(head);
 
         controller = GetComponent<NetworkSnakeController>();
     }
@@ -191,15 +189,19 @@ public class Snake : NetworkBehaviour {
             Die();
         }
 
-        if (links.Count > 1) {
+        if (links.Count > 0) {
             var oldTail = links[links.Count - 1];
             links.RemoveAt(links.Count - 1);
-            links.Insert(1, oldTail);
+            links.Insert(0, oldTail);
             oldTail.transform.position = head.transform.position;
         }
 
         head.transform.rotation = currentDirection.GetHeadRotation();
         head.transform.position = newPosition;
+    }
+
+    private bool AboutToCollideWithSelf(Vector3 newPosition) {
+        return links.Any(x => x.transform.position == newPosition);
     }
 
     // [Command]
@@ -212,7 +214,7 @@ public class Snake : NetworkBehaviour {
     // [ClientRpc]
     // public void RpcSpawnTail(GameObject newTail) {
     //     newTail.transform.parent = transform;
-    //     links.Insert(1, newTail);
+    //     links.Insert(0, newTail);
     // }
 
     public override void OnStartLocalPlayer() {
@@ -235,17 +237,14 @@ public class Snake : NetworkBehaviour {
         snakeToModify.currentDirection = Direction.Deserialize(direction);
     }
 
-    private bool AboutToCollideWithSelf(Vector3 newPosition) {
-        return links.Any(x => x.transform.position == newPosition);
-    }
+    // Not used at the moment
+    // private bool AboutToCollideWithAnySnake(Vector3 newPosition) {
+    //     return all.Any(x => AreWeGoingToCollideWithOtherSnake(x, newPosition));
+    // }
 
-    private bool AboutToCollideWithAnySnake(Vector3 newPosition) {
-        return all.Any(x => AreWeGoingToCollideWithOtherSnake(x, newPosition));
-    }
-
-    private bool AreWeGoingToCollideWithOtherSnake(Snake otherSnake, Vector3 newPosition) {
-        return otherSnake.links.Any(x => x.transform.position == newPosition);
-    }
+    // private bool AreWeGoingToCollideWithOtherSnake(Snake otherSnake, Vector3 newPosition) {
+    //     return otherSnake.links.Any(x => x.transform.position == newPosition);
+    // }
 
     void Die() {
         Debug.Log("DIE");
