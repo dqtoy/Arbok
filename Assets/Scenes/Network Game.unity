@@ -5104,6 +5104,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 262a61711b7bb4a3ebb58113b79e74c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  applePrefab: {fileID: 1413406949541522, guid: 3d3c9a27c87b04822bccd5080e35c146,
+    type: 2}
   snake: {fileID: 0}
 --- !u!4 &1221986594
 Transform:

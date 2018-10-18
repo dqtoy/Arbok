@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
@@ -86,15 +87,26 @@ public class SnakeChangeDirectionEvent : SnakeEvent {
     }
 }
 
-public class SnakeGrowEvent : SnakeEvent {
+public class SnakeEatAppleEvent : SnakeEvent {
+    GameObject apple;
+
+    public SnakeEatAppleEvent(GameObject apple) {
+        this.apple = apple;
+    }
 
     public void Execute(Snake snake) {
+        apple.SetActive(false);
         var newTail = GameObject.Instantiate(snake.snakeTailPrefab, snake.head.transform.position, Quaternion.identity);
         newTail.transform.parent = snake.transform;
         snake.links.Insert(0, newTail);
     }
 
-    public void Reverse(Snake snake) { }
+    public void Reverse(Snake snake) {
+        var firstTailLink = snake.links[0];
+        snake.links.Remove(firstTailLink);
+        GameObject.Destroy(firstTailLink);
+        apple.SetActive(true);
+    }
 }
 
 public class Snake : NetworkBehaviour {
@@ -107,12 +119,13 @@ public class Snake : NetworkBehaviour {
     public float movesPerSecond = 5;
 
     public GameObject head;
-    float elapsedTime = 0;
     public Direction currentDirection = Up.I;
-    NetworkSnakeController controller;
     public int currentTick { get; private set; }
     public SnakeEvents snakeEvents = new SnakeEvents();
     public Text tickUI;
+    public NetworkSnakeController controller;
+
+    float elapsedTime = 0;
 
     public void ChangeDirectionAtNextTick(Direction newDirection) {
         snakeEvents.AddOrReplaceAtTick(currentTick + 1, new SnakeChangeDirectionEvent(newDirection));
@@ -120,15 +133,16 @@ public class Snake : NetworkBehaviour {
 
     public void ChangeDirectionAtTick(Direction newDirection, int tick) {
         var missedTick = tick <= this.currentTick;
+        var changeDirectionEvent = new SnakeChangeDirectionEvent(newDirection);
 
         if (missedTick) {
             var rolledBackCount = RollbackToTick(tick - 1);
-            snakeEvents.AddOrReplaceAtTick(tick, new SnakeChangeDirectionEvent(newDirection));
+            snakeEvents.AddOrReplaceAtTick(tick, changeDirectionEvent);
             for (int i = 0; i < rolledBackCount; i++) {
                 DoTick();
             }
         } else {
-            snakeEvents.AddOrReplaceAtTick(tick, new SnakeChangeDirectionEvent(newDirection));
+            snakeEvents.AddOrReplaceAtTick(tick, changeDirectionEvent);
         }
 
         UpdateTickText();
@@ -158,8 +172,6 @@ public class Snake : NetworkBehaviour {
     void Awake() {
         currentTick = 0;
         all.Add(this);
-
-        controller = GetComponent<NetworkSnakeController>();
     }
 
     void Update() {
@@ -181,9 +193,7 @@ public class Snake : NetworkBehaviour {
 
         snakeEvents.ExecuteEventsAtTickIfAny(currentTick, this);
 
-        float speed = 1.0f;
-
-        Vector3 newPosition = head.transform.position + speed * currentDirection.GetMoveVector();
+        Vector3 newPosition = head.transform.position + currentDirection.GetMoveVector();
 
         if (AboutToCollideWithSelf(newPosition)) {
             Die();
@@ -204,19 +214,6 @@ public class Snake : NetworkBehaviour {
         return links.Any(x => x.transform.position == newPosition);
     }
 
-    // [Command]
-    // private void CmdSpawnTail() {
-    //     GameObject newTail = Instantiate(snakeTailPrefab, head.transform.position, Quaternion.identity);
-    //     NetworkServer.SpawnWithClientAuthority(newTail, connectionToClient);
-    //     RpcSpawnTail(newTail);
-    // }
-
-    // [ClientRpc]
-    // public void RpcSpawnTail(GameObject newTail) {
-    //     newTail.transform.parent = transform;
-    //     links.Insert(0, newTail);
-    // }
-
     public override void OnStartLocalPlayer() {
         CmdRequestSnakePositions();
     }
@@ -224,17 +221,37 @@ public class Snake : NetworkBehaviour {
     [Command]
     public void CmdRequestSnakePositions() {
         Debug.Log("CmdRequestSnakePositions: connectionToClient " + connectionToClient.connectionId);
-        Snake.all.ForEach(x => TargetReceiveSnakePosition(connectionToClient, x.head.transform.position, x.currentTick, x.currentDirection.Serialize(), x.netId));
+        Snake.all.ForEach(
+            x => {
+                var linksJson = JsonConvert.SerializeObject(x.links.Select(y => y.transform.position).ToArray());
+                Debug.Log("TargetReceiveSnakePosition: linksJson: " + linksJson);
+                TargetReceiveSnakePosition(
+                    connectionToClient,
+                    x.head.transform.position,
+                    x.currentTick,
+                    x.currentDirection.Serialize(),
+                    linksJson,
+                    x.netId
+                );
+            }
+        );
     }
 
     [TargetRpc]
-    public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, int tick, short direction, NetworkInstanceId netId) {
+    public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, int tick, short direction, string linksJson, NetworkInstanceId netId) {
         if (netId == this.netId) return;
         var snakeToModify = Snake.all.Where(x => x.netId == netId).First();
         snakeToModify.head.transform.position = position;
         snakeToModify.currentTick = tick;
         snakeToModify.elapsedTime = 0;
         snakeToModify.currentDirection = Direction.Deserialize(direction);
+
+        Debug.Log("TargetReceiveSnakePosition: linksJson: " + linksJson);
+
+        var z = JsonConvert.DeserializeObject<Vector3[]>(linksJson);
+        snakeToModify.links = z.Select(y => Instantiate(snakeTailPrefab, y, Quaternion.identity)).ToList();
+        snakeToModify.links.ForEach(x => x.transform.parent = snakeToModify.transform);
+
     }
 
     // Not used at the moment
@@ -252,21 +269,28 @@ public class Snake : NetworkBehaviour {
         Destroy(gameObject);
     }
 
-    void Grow() {
-        snakeEvents.AddOrReplaceAtTick(currentTick + 1, new SnakeGrowEvent());
-    }
-
     void OnTriggerEnter(Collider other) {
         //if (other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeTail>())) {
         //    Die();
         //}
         if (other.gameObject.HasComponent<Apple>()) {
-            OnHeadMeetApple(other.gameObject);
+            EatApple(other.gameObject);
         }
     }
 
-    void OnHeadMeetApple(GameObject apple) {
-        Destroy(apple);
-        Grow();
+    void EatApple(GameObject apple) {
+        snakeEvents.AddOrReplaceAtTick(currentTick + 1, new SnakeEatAppleEvent(apple));
+        // CmdSnakeGrow(currentTick + 1);
     }
+
+    // Not sure if we need to send message when eating an apple
+    // [Command]
+    // private void CmdSnakeGrow(int tick) {
+    //     RpcSnakeGrow(tick);
+    // }
+
+    // [ClientRpc]
+    // public void RpcSnakeGrow(int tick) {
+    //     // snakeEvents.AddOrReplaceAtTick(tick, new SnakeGrowEvent());
+    // }
 }
