@@ -49,7 +49,7 @@ public class SnakeCompoundEvent : Dictionary<Type, SnakeEvent> {
     }
 
     public void Reverse(Snake snake) {
-        foreach (var kvp in events) {
+        foreach (var kvp in events.Reverse()) {
             kvp.Value.Reverse(snake);
         }
     }
@@ -60,15 +60,61 @@ public interface SnakeEvent {
     void Reverse(Snake snake);
 }
 
+class SnakeMoveEvent : SnakeEvent {
+    Vector3 oldTailPosition;
+
+    public void Execute(Snake snake) {
+        // Debug.Log("SnakeMoveEvent Execute: " + JsonConvert.SerializeObject(snake.head.transform.position));
+        Vector3 newPosition = snake.head.transform.position + snake.currentDirection.GetMoveVector();
+
+        if (AboutToCollideWithSelf(snake, newPosition)) {
+            snake.Die();
+        }
+
+        if (snake.links.Count > 0) {
+            var oldTail = snake.links[snake.links.Count - 1];
+            snake.links.RemoveAt(snake.links.Count - 1);
+            snake.links.Insert(0, oldTail);
+            oldTailPosition = oldTail.transform.position;
+            oldTail.transform.position = snake.head.transform.position;
+        }
+
+        snake.head.transform.rotation = snake.currentDirection.GetHeadRotation();
+        snake.head.transform.position = newPosition;
+        // Debug.Log("SnakeMoveEvent Execute: " + JsonConvert.SerializeObject(snake.head.transform.position));
+    }
+
+    private bool AboutToCollideWithSelf(Snake snake, Vector3 newPosition) {
+        return snake.links.Any(x => x.transform.position == newPosition);
+    }
+
+    public void Reverse(Snake snake) {
+        // Debug.Log("SnakeMoveEvent Reverse: " + JsonConvert.SerializeObject(snake.head.transform.position));
+        Vector3 oldPosition = snake.head.transform.position - snake.currentDirection.GetMoveVector();
+
+        snake.head.transform.position = oldPosition;
+        snake.head.transform.rotation = snake.currentDirection.GetHeadRotation();
+
+        if (snake.links.Count > 0) {
+            var newTail = snake.links[0];
+            snake.links.RemoveAt(0);
+            snake.links.Add(newTail);
+            newTail.transform.position = oldTailPosition;
+        }
+        // Debug.Log("SnakeMoveEvent Reverse: " + JsonConvert.SerializeObject(snake.head.transform.position));
+    }
+}
+
 public class SnakeChangeDirectionEvent : SnakeEvent {
-    public Direction previousDirection = DummyDirection.I;
-    public Direction newDirection;
+    Direction previousDirection = DummyDirection.I;
+    Direction newDirection;
 
     public SnakeChangeDirectionEvent(Direction newDirection) {
         this.newDirection = newDirection;
     }
 
     public void Execute(Snake snake) {
+        Debug.Log("SnakeChangeDirectionEvent Execute: " + snake.currentDirection);
         previousDirection = snake.currentDirection;
 
         if ((newDirection == Down.I && snake.currentDirection == Up.I) ||
@@ -80,10 +126,13 @@ public class SnakeChangeDirectionEvent : SnakeEvent {
         }
 
         snake.currentDirection = newDirection;
+        Debug.Log("SnakeChangeDirectionEvent Execute: " + snake.currentDirection);
     }
 
     public void Reverse(Snake snake) {
+        Debug.Log("SnakeChangeDirectionEvent Reverse: " + snake.currentDirection);
         snake.currentDirection = previousDirection;
+        Debug.Log("SnakeChangeDirectionEvent Reverse: " + snake.currentDirection);
     }
 }
 
@@ -95,17 +144,21 @@ public class SnakeEatAppleEvent : SnakeEvent {
     }
 
     public void Execute(Snake snake) {
+        Debug.Log("SnakeEatAppleEvent Execute: " + JsonConvert.SerializeObject(snake.head.transform.position));
         apple.SetActive(false);
         var newTail = GameObject.Instantiate(snake.snakeTailPrefab, snake.head.transform.position, Quaternion.identity);
         newTail.transform.parent = snake.transform;
         snake.links.Insert(0, newTail);
+        Debug.Log("SnakeEatAppleEvent Execute: " + JsonConvert.SerializeObject(snake.head.transform.position));
     }
 
     public void Reverse(Snake snake) {
+        Debug.Log("SnakeEatAppleEvent Reverse: " + JsonConvert.SerializeObject(snake.head.transform.position));
         var firstTailLink = snake.links[0];
         snake.links.Remove(firstTailLink);
         GameObject.Destroy(firstTailLink);
         apple.SetActive(true);
+        Debug.Log("SnakeEatAppleEvent Reverse: " + JsonConvert.SerializeObject(snake.head.transform.position));
     }
 }
 
@@ -123,9 +176,32 @@ public class Snake : NetworkBehaviour {
     public int currentTick { get; private set; }
     public SnakeEvents snakeEvents = new SnakeEvents();
     public Text tickUI;
+    public Text netIdUI;
     public NetworkSnakeController controller;
+    public Transform cameraTarget;
 
     float elapsedTime = 0;
+
+    void Awake() {
+        currentTick = 0;
+        all.Add(this);
+        Debug.Log(0 + " head position: " + JsonConvert.SerializeObject(head.transform.position));
+    }
+
+    void Update() {
+        elapsedTime += Time.deltaTime;
+
+        if (elapsedTime > (1 / movesPerSecond)) {
+            elapsedTime -= 1 / movesPerSecond;
+            DoTick();
+            // Debug.Log(currentTick + " head position: " + JsonConvert.SerializeObject(head.transform.position));
+        }
+        cameraTarget.position += Vector3.up * (links.Count + 1);
+    }
+
+    void UpdateTickText() {
+        tickUI.text = currentTick.ToString();
+    }
 
     public void ChangeDirectionAtNextTick(Direction newDirection) {
         snakeEvents.AddOrReplaceAtTick(currentTick + 1, new SnakeChangeDirectionEvent(newDirection));
@@ -136,11 +212,10 @@ public class Snake : NetworkBehaviour {
         var changeDirectionEvent = new SnakeChangeDirectionEvent(newDirection);
 
         if (missedTick) {
+            var realCurrentTick = currentTick;
             var rolledBackCount = RollbackToTick(tick - 1);
             snakeEvents.AddOrReplaceAtTick(tick, changeDirectionEvent);
-            for (int i = 0; i < rolledBackCount; i++) {
-                DoTick();
-            }
+            RollForwardToTick(realCurrentTick);
         } else {
             snakeEvents.AddOrReplaceAtTick(tick, changeDirectionEvent);
         }
@@ -148,7 +223,26 @@ public class Snake : NetworkBehaviour {
         UpdateTickText();
     }
 
+    public Vector3 GetHeadPositionAtTick(int tick) {
+        Debug.Log("GetHeadPositionAtTick A " + currentTick + " | " + JsonConvert.SerializeObject(head.transform.position));
+        var realCurrentTick = currentTick;
+        RollbackToTick(tick);
+        Debug.Log("GetHeadPositionAtTick B " + currentTick + " | " + JsonConvert.SerializeObject(head.transform.position));
+        var x = head.transform.position;
+        RollForwardToTick(realCurrentTick);
+        Debug.Log("GetHeadPositionAtTick C " + currentTick + " | " + JsonConvert.SerializeObject(head.transform.position));
+
+        return x;
+    }
+
+    void RollForwardToTick(int tick) {
+        while (currentTick < tick) {
+            DoTick();
+        }
+    }
+
     int RollbackToTick(int tickToRollbackTo) {
+        Debug.Log("RollbackToTick " + tickToRollbackTo);
         var rolledBackCount = 0;
 
         while (this.currentTick != tickToRollbackTo) {
@@ -159,63 +253,26 @@ public class Snake : NetworkBehaviour {
         return rolledBackCount;
     }
 
-    void RollbackTick() {
-        MoveBack(currentDirection);
-        snakeEvents.ReverseEventsAtTickIfAny(currentTick, this);
-        currentTick--;
-    }
-
-    void MoveBack(Direction direction) {
-        head.transform.position += direction.GetMoveVector() * -1;
-    }
-
-    void Awake() {
-        currentTick = 0;
-        all.Add(this);
-    }
-
-    void Update() {
-        elapsedTime += Time.deltaTime;
-
-        if (elapsedTime > (1 / movesPerSecond)) {
-            elapsedTime -= 1 / movesPerSecond;
-            DoTick();
-        }
-    }
-
-    void UpdateTickText() {
-        tickUI.text = currentTick.ToString();
-    }
-
     void DoTick() {
         currentTick++;
         UpdateTickText();
 
+        snakeEvents.AddOrReplaceAtTick(currentTick, new SnakeMoveEvent());
+
         snakeEvents.ExecuteEventsAtTickIfAny(currentTick, this);
-
-        Vector3 newPosition = head.transform.position + currentDirection.GetMoveVector();
-
-        if (AboutToCollideWithSelf(newPosition)) {
-            Die();
-        }
-
-        if (links.Count > 0) {
-            var oldTail = links[links.Count - 1];
-            links.RemoveAt(links.Count - 1);
-            links.Insert(0, oldTail);
-            oldTail.transform.position = head.transform.position;
-        }
-
-        head.transform.rotation = currentDirection.GetHeadRotation();
-        head.transform.position = newPosition;
     }
 
-    private bool AboutToCollideWithSelf(Vector3 newPosition) {
-        return links.Any(x => x.transform.position == newPosition);
+    void RollbackTick() {
+        Debug.Log("RollbackTick");
+        snakeEvents.ReverseEventsAtTickIfAny(currentTick, this);
+        currentTick--;
     }
 
     public override void OnStartLocalPlayer() {
         CmdRequestSnakePositions();
+        netIdUI.text = netId.ToString();
+        netIdUI.text += "*";
+        MainCamera.I.target = cameraTarget;
     }
 
     [Command]
@@ -263,7 +320,7 @@ public class Snake : NetworkBehaviour {
     //     return otherSnake.links.Any(x => x.transform.position == newPosition);
     // }
 
-    void Die() {
+    public void Die() {
         Debug.Log("DIE");
         all.Remove(this);
         Destroy(gameObject);
