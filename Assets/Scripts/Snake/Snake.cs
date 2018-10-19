@@ -146,15 +146,30 @@ public class SnakeEatAppleEvent : SnakeEvent {
     public void Execute(Snake snake) {
         Debug.Log("SnakeEatAppleEvent Execute: " + JsonConvert.SerializeObject(snake.head.transform.position));
         apple.SetActive(false);
-        var newTail = GameObject.Instantiate(snake.snakeTailPrefab, snake.head.transform.position, Quaternion.identity);
+
+        GameObject currentLastTailLink;
+
+        if (snake.links.Count == 0) {
+            currentLastTailLink = snake.head;
+        } else {
+            currentLastTailLink = snake.links.Last();
+        }
+
+        var newTail = GameObject.Instantiate(snake.snakeTailPrefab, currentLastTailLink.transform.position, Quaternion.identity);
         newTail.transform.parent = snake.transform;
-        snake.links.Insert(0, newTail);
+
+        if (snake.links.Count < 2) {
+            snake.links.Insert(0, newTail);
+        } else {
+            snake.links.Insert(snake.links.Count - 1, newTail);
+        }
+
         Debug.Log("SnakeEatAppleEvent Execute: " + JsonConvert.SerializeObject(snake.head.transform.position));
     }
 
     public void Reverse(Snake snake) {
         Debug.Log("SnakeEatAppleEvent Reverse: " + JsonConvert.SerializeObject(snake.head.transform.position));
-        var firstTailLink = snake.links[0];
+        var firstTailLink = snake.links[snake.links.Count - 2];
         snake.links.Remove(firstTailLink);
         GameObject.Destroy(firstTailLink);
         apple.SetActive(true);

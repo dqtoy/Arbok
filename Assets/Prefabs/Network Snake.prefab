@@ -1056,7 +1056,7 @@ MonoBehaviour:
   snakeTailPrefab: {fileID: 1061850045364242, guid: 596fe874a6272ce43ad4018b9b7e2753,
     type: 2}
   links: []
-  movesPerSecond: 10
+  movesPerSecond: 2
   head: {fileID: 1296976921152398}
   tickUI: {fileID: 114021671399753930}
   netIdUI: {fileID: 114921518613770482}
