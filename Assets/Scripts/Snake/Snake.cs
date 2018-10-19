@@ -138,42 +138,26 @@ public class SnakeChangeDirectionEvent : SnakeEvent {
 
 public class SnakeEatAppleEvent : SnakeEvent {
     GameObject apple;
+    Vector3 newTailPosition;
 
     public SnakeEatAppleEvent(GameObject apple) {
         this.apple = apple;
     }
 
     public void Execute(Snake snake) {
-        Debug.Log("SnakeEatAppleEvent Execute: " + JsonConvert.SerializeObject(snake.head.transform.position));
         apple.SetActive(false);
 
-        GameObject currentLastTailLink;
-
-        if (snake.links.Count == 0) {
-            currentLastTailLink = snake.head;
-        } else {
-            currentLastTailLink = snake.links.Last();
-        }
-
-        var newTail = GameObject.Instantiate(snake.snakeTailPrefab, currentLastTailLink.transform.position, Quaternion.identity);
+        var newTail = GameObject.Instantiate(snake.snakeTailPrefab);
         newTail.transform.parent = snake.transform;
 
-        if (snake.links.Count < 2) {
-            snake.links.Insert(0, newTail);
-        } else {
-            snake.links.Insert(snake.links.Count - 1, newTail);
-        }
-
-        Debug.Log("SnakeEatAppleEvent Execute: " + JsonConvert.SerializeObject(snake.head.transform.position));
+        snake.links.Add(newTail);
     }
 
     public void Reverse(Snake snake) {
-        Debug.Log("SnakeEatAppleEvent Reverse: " + JsonConvert.SerializeObject(snake.head.transform.position));
-        var firstTailLink = snake.links[snake.links.Count - 2];
+        var firstTailLink = snake.links.Last();
         snake.links.Remove(firstTailLink);
         GameObject.Destroy(firstTailLink);
         apple.SetActive(true);
-        Debug.Log("SnakeEatAppleEvent Reverse: " + JsonConvert.SerializeObject(snake.head.transform.position));
     }
 }
 
