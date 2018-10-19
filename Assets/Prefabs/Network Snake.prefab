@@ -1055,13 +1055,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   snakeTailPrefab: {fileID: 1061850045364242, guid: 596fe874a6272ce43ad4018b9b7e2753,
     type: 2}
-  links: []
-  movesPerSecond: 2
   head: {fileID: 1296976921152398}
-  tickUI: {fileID: 114021671399753930}
-  netIdUI: {fileID: 114921518613770482}
-  controller: {fileID: 114869938117225824}
   cameraTarget: {fileID: 4225858558487920}
+  tickUI: {fileID: 114021671399753930}
+  movesPerSecond: 20
 --- !u!114 &114379010013504446
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -1121,6 +1118,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25b0039df5ef54be8a50ae1c114cf05a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  netIdUI: {fileID: 114921518613770482}
 --- !u!114 &114921518613770482
 MonoBehaviour:
   m_ObjectHideFlags: 1

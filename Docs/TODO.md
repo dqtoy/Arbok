@@ -15,6 +15,7 @@ PHASE ARBOK
 - [x] 2 player snake (AI?)
     - [x] snakes collide with eachother
 - [ ] border slowly shrinking, or falling away
-- [ ] move camera with snake
-- [ ] zoom out camera based on snake length
+- [x] move camera with snake
+- [x] zoom out camera based on snake length
+- [ ] sync apples on join match
 

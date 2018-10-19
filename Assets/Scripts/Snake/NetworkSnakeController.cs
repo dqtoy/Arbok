@@ -1,23 +1,60 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
+using UnityEngine.UI;
 
 public class NetworkSnakeController : NetworkBehaviour {
+    public Text netIdUI;
 
-    // Vector3 nextHeadPos;
     Snake snake;
 
-    // Use this for initialization
-    void Start() {
+    public void Awake() {
         snake = GetComponent<Snake>();
     }
 
-    // Update is called once per frame
+    public override void OnStartLocalPlayer() {
+        CmdRequestSnakePositions();
+        netIdUI.text = netId.ToString() + "*";
+        MainCamera.I.target = snake.cameraTarget;
+    }
+
+    [Command]
+    public void CmdRequestSnakePositions() {
+        Snake.all.ForEach(
+            x => {
+                var linksJson = JsonConvert.SerializeObject(x.links.Select(y => y.transform.position).ToArray());
+                TargetReceiveSnakePosition(
+                    connectionToClient,
+                    x.head.transform.position,
+                    x.currentTick,
+                    x.currentDirection.Serialize(),
+                    linksJson,
+                    x.GetComponent<NetworkIdentity>().netId
+                );
+            }
+        );
+    }
+
+    [TargetRpc]
+    public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, int tick, short direction, string linksJson, NetworkInstanceId netId) {
+        if (netId == this.netId) return;
+
+        var snakeToModify = Snake.all.First(x => x.GetComponent<NetworkIdentity>().netId == netId);
+
+        snakeToModify.SetSnakeData(new SnakeState() {
+            linkPositions = JsonConvert.DeserializeObject<Vector3[]>(linksJson),
+                tick = tick,
+                headPosition = position,
+                direction = Direction.Deserialize(direction),
+                elapsedTime = 0
+        });
+    }
+
     void Update() {
-        if (!isLocalPlayer) {
-            return;
-        }
+        if (!isLocalPlayer) return;
 
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) {
             SendNewDirection(Up.I);
@@ -37,12 +74,7 @@ public class NetworkSnakeController : NetworkBehaviour {
         snake.ChangeDirectionAtNextTick(direction);
         Debug.Log("direction: " + direction.Serialize());
         CmdKeyDown(direction.Serialize(), snake.currentTick + 1);
-        // SendHeadPosition();
     }
-
-    // public void SendHeadPosition() {
-    //     CmdSendHeadPosition(snake.head.transform.position);
-    // }
 
     // ==============================
     // Network
@@ -58,24 +90,4 @@ public class NetworkSnakeController : NetworkBehaviour {
             snake.ChangeDirectionAtTick(Direction.Deserialize(newDirection), tick);
         }
     }
-
-    // [Command]
-    // private void CmdSendHeadPosition(Vector3 headPosition) {
-    //     RpcReceiveHeadPosition(headPosition);
-    // }
-
-    // [ClientRpc]
-    // public void RpcReceiveHeadPosition(Vector3 headPosition) {
-    //     if (!isLocalPlayer) {
-    //         snake.head.transform.position = headPosition;
-    //     }
-    // }
-
-    // ==============================
-    // ISnakeController
-    // ==============================
-
-    // public Vector3 GetNextHeadPosition() {
-    //     return nextHeadPos;
-    // }
 }
