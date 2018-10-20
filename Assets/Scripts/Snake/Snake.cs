@@ -12,7 +12,7 @@ public class Snake : NetworkBehaviour {
     public static List<Snake> all = new List<Snake>();
 
     public GameObject snakeTailPrefab;
-    public GameObject head;
+    public SnakeHead head;
     public Transform cameraTarget;
     public Text tickUI;
     public float movesPerSecond = 5;

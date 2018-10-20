@@ -85,7 +85,6 @@ class SnakeMoveEvent : SnakeEvent {
             oldTail.transform.position = snake.head.transform.position;
         }
 
-        snake.head.transform.rotation = snake.currentDirection.GetHeadRotation();
         snake.head.transform.position = newPosition;
     }
 
@@ -97,7 +96,6 @@ class SnakeMoveEvent : SnakeEvent {
         Vector3 oldPosition = snake.head.transform.position - snake.currentDirection.GetMoveVector();
 
         snake.head.transform.position = oldPosition;
-        snake.head.transform.rotation = snake.currentDirection.GetHeadRotation();
 
         if (snake.links.Count > 0) {
             var newTail = snake.links[0];
@@ -126,9 +124,11 @@ public class SnakeChangeDirectionEvent : SnakeEvent {
         if (invalidTurn(snake.currentDirection, newDirection)) return;
 
         snake.currentDirection = newDirection;
+        snake.head.SetRotationOfVisual(newDirection.GetHeadRotation());
     }
 
     public void Reverse(Snake snake) {
+        snake.head.SetRotationOfVisual(previousDirection.GetHeadRotation());
         snake.currentDirection = previousDirection;
     }
 

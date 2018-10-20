@@ -4,8 +4,14 @@ using UnityEngine;
 
 public class SnakeHead : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
+    GameObject visual;
+
+    private void Awake() {
+        visual = transform.Find("Visual").gameObject;
+    }
+
+    // Use this for initialization
+    void Start () {
 		
 	}
 	
@@ -13,4 +19,8 @@ public class SnakeHead : MonoBehaviour {
 	void Update () {
 		
 	}
+
+    public void SetRotationOfVisual(Quaternion quaternion) {
+        visual.transform.rotation = quaternion;
+    }
 }
