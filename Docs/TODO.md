@@ -28,6 +28,8 @@ PHASE ARBOK
     - [ ] snakes
 - [ ] move one tick at a time on keypress
 - [ ] sync head direction on join
+- [ ] interpolation of snake movement
+- [ ] playback game after game ends
 ## Possible Issues
 - Apple syncing
     - if snake eats an apple or something right when a new player joins, that apple might still show as active on the new players client
