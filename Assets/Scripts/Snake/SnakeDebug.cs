@@ -1,19 +1,21 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class SnakeDebug : MonoBehaviour, ISerializationCallbackReceiver {
 
 	public Snake snake;
+	public Text eventsText;
 
 	// Use this for initialization
 	void Start() {
-
+		// snake.AfterTick += () => { };
 	}
 
 	// Update is called once per frame
 	void Update() {
-
+		eventsText.text = snake.snakeEvents.ToString();
 	}
 
 	// Debug info

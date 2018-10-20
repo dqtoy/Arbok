@@ -23,6 +23,9 @@ public class Snake : NetworkBehaviour {
     public List<GameObject> links { get; private set; }
     public int currentTick { get; private set; }
 
+    public event Action AfterTick;
+    public event Action AfterRollbackTick;
+
     float elapsedTime = 0;
 
     void Awake() {
@@ -143,12 +146,15 @@ public class Snake : NetworkBehaviour {
         snakeEvents.AddOrReplaceAtTick(currentTick, new SnakeMoveEvent());
 
         snakeEvents.ExecuteEventsAtTickIfAny(currentTick, this);
+
+        AfterTick?.Invoke();
     }
 
     void RollbackTick() {
         Toolbox.Log("RollbackTick");
         snakeEvents.ReverseEventsAtTickIfAny(currentTick, this);
         currentTick--;
+        AfterRollbackTick?.Invoke();
     }
 
     public void SetSnakeData(SnakeState state) {
