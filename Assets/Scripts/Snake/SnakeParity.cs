@@ -48,7 +48,7 @@ public class SnakeParity : NetworkBehaviour {
 			throw new UnityException("CmdCheckHeadParity check failed! Expected head position: " + expectedHeadPosition + " | Actual: " + actualHeadPosition + " | at tick: " + tick + " | netId: " + netId);
 		}
 
-		Debug.Log("DoHeadCheck PASS");
+        Toolbox.Log("DoHeadCheck PASS");
 	}
 
 	void Update() {

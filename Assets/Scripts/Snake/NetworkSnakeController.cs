@@ -24,7 +24,7 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     [Command]
     public void CmdRequestApplePositions() {
-        Debug.Log("CmdRequestApplePositions");
+        Toolbox.Log("CmdRequestApplePositions");
         TargetReceiveApplePositions(
             connectionToClient,
             JsonConvert.SerializeObject(AppleManager.all.Select(x => x.ToState()).ToArray())
@@ -33,7 +33,7 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     [TargetRpc]
     public void TargetReceiveApplePositions(NetworkConnection connection, string appleStatesJson) {
-        Debug.Log("TargetReceiveApplePositions: isServer: " + isServer);
+        Toolbox.Log("TargetReceiveApplePositions: isServer: " + isServer);
         if (!isServer) {
             AppleManager.DestroyAll();
             JsonConvert.DeserializeObject<AppleState[]>(appleStatesJson).ToList().ForEach(apple => {

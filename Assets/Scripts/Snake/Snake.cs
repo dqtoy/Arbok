@@ -107,13 +107,13 @@ public class Snake : NetworkBehaviour {
     }
 
     public Vector3 GetHeadPositionAtTick(int tick) {
-        Debug.Log("GetHeadPositionAtTick A " + currentTick + " | " + JsonConvert.SerializeObject(head.transform.position));
+        Toolbox.Log("GetHeadPositionAtTick A " + currentTick + " | " + JsonConvert.SerializeObject(head.transform.position));
         var realCurrentTick = currentTick;
         RollbackToTick(tick);
-        Debug.Log("GetHeadPositionAtTick B " + currentTick + " | " + JsonConvert.SerializeObject(head.transform.position));
+        Toolbox.Log("GetHeadPositionAtTick B " + currentTick + " | " + JsonConvert.SerializeObject(head.transform.position));
         var x = head.transform.position;
         RollForwardToTick(realCurrentTick);
-        Debug.Log("GetHeadPositionAtTick C " + currentTick + " | " + JsonConvert.SerializeObject(head.transform.position));
+        Toolbox.Log("GetHeadPositionAtTick C " + currentTick + " | " + JsonConvert.SerializeObject(head.transform.position));
 
         return x;
     }
@@ -125,7 +125,7 @@ public class Snake : NetworkBehaviour {
     }
 
     int RollbackToTick(int tickToRollbackTo) {
-        Debug.Log("RollbackToTick " + tickToRollbackTo);
+        Toolbox.Log("RollbackToTick " + tickToRollbackTo);
         var rolledBackCount = 0;
 
         while (this.currentTick != tickToRollbackTo) {
@@ -146,7 +146,7 @@ public class Snake : NetworkBehaviour {
     }
 
     void RollbackTick() {
-        Debug.Log("RollbackTick");
+        Toolbox.Log("RollbackTick");
         snakeEvents.ReverseEventsAtTickIfAny(currentTick, this);
         currentTick--;
     }
@@ -160,7 +160,7 @@ public class Snake : NetworkBehaviour {
     }
 
     public void Die() {
-        Debug.Log("DIE");
+        Toolbox.Log("DIE");
         Destroy(gameObject);
         // Hide visible parts
         // Stop moving/ticking
