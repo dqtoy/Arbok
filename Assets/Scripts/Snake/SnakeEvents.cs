@@ -40,6 +40,20 @@ public class SnakeEvents {
         }
         return result;
     }
+
+    public void PurgeTicksAfterTick(int tick) {
+        var keysToRemove = new List<int>();
+
+        foreach (var kvp1 in dict) {
+            if (kvp1.Key > tick) {
+                keysToRemove.Add(kvp1.Key);
+            }
+        }
+
+        foreach (var key in keysToRemove) {
+            dict.Remove(key);
+        }
+    }
 }
 
 public class SnakeCompoundEvent {
@@ -174,7 +188,6 @@ public class SnakeEatAppleEvent : SnakeEvent {
         GameObject.Destroy(firstTailLink);
         apple.SetActive(true);
     }
-
 
     public override string ToString() {
         return "E";

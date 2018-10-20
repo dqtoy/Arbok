@@ -26,6 +26,8 @@ public class Snake : NetworkBehaviour {
     public event Action AfterTick;
     public event Action AfterRollbackTick;
 
+    public bool manualTickDebugMode = false;
+
     float elapsedTime = 0;
 
     void Awake() {
@@ -38,50 +40,53 @@ public class Snake : NetworkBehaviour {
     void Update() {
         elapsedTime += Time.deltaTime;
 
-        // if (elapsedTime > (1 / movesPerSecond)) {
-        //     elapsedTime -= 1 / movesPerSecond;
-        //     DoTick();
-        // }
+        if (manualTickDebugMode) {
+            if (Input.GetKeyDown(KeyCode.N)) {
+                DoTick();
+            }
 
-        if (Input.GetKeyDown(KeyCode.N)) {
-            DoTick();
-        }
-
-        if (Input.GetKeyDown(KeyCode.B)) {
-            RollbackTick();
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha1) && netId.Value == 1) {
-            if (Input.GetKey(KeyCode.LeftShift)) {
+            if (Input.GetKeyDown(KeyCode.B)) {
                 RollbackTick();
-            } else {
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha1) && netId.Value == 1) {
+                if (Input.GetKey(KeyCode.LeftShift)) {
+                    RollbackTick();
+                } else {
+                    DoTick();
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha2) && netId.Value == 2) {
+                if (Input.GetKey(KeyCode.LeftShift)) {
+                    RollbackTick();
+                } else {
+                    DoTick();
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha3) && netId.Value == 3) {
+                if (Input.GetKey(KeyCode.LeftShift)) {
+                    RollbackTick();
+                } else {
+                    DoTick();
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha4) && netId.Value == 4) {
+                if (Input.GetKey(KeyCode.LeftShift)) {
+                    RollbackTick();
+                } else {
+                    DoTick();
+                }
+            }
+        } else {
+            if (elapsedTime > (1 / movesPerSecond)) {
+                elapsedTime -= 1 / movesPerSecond;
                 DoTick();
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Alpha2) && netId.Value == 2) {
-            if (Input.GetKey(KeyCode.LeftShift)) {
-                RollbackTick();
-            } else {
-                DoTick();
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha3) && netId.Value == 3) {
-            if (Input.GetKey(KeyCode.LeftShift)) {
-                RollbackTick();
-            } else {
-                DoTick();
-            }
-        }
-
-        if (Input.GetKeyDown(KeyCode.Alpha4) && netId.Value == 4) {
-            if (Input.GetKey(KeyCode.LeftShift)) {
-                RollbackTick();
-            } else {
-                DoTick();
-            }
-        }
         cameraTarget.position += Vector3.up * (links.Count + 1);
     }
 
@@ -93,17 +98,17 @@ public class Snake : NetworkBehaviour {
         snakeEvents.AddOrReplaceAtTick(currentTick + 1, new SnakeChangeDirectionEvent(newDirection));
     }
 
-    public void ChangeDirectionAtTick(Direction newDirection, int tick) {
+    public void CorrectEventAtTick(SnakeEvent snakeEvent, int tick) {
         var missedTick = tick <= this.currentTick;
-        var changeDirectionEvent = new SnakeChangeDirectionEvent(newDirection);
 
         if (missedTick) {
             var realCurrentTick = currentTick;
             var rolledBackCount = RollbackToTick(tick - 1);
-            snakeEvents.AddOrReplaceAtTick(tick, changeDirectionEvent);
+            snakeEvents.PurgeTicksAfterTick(currentTick);
+            snakeEvents.AddOrReplaceAtTick(tick, snakeEvent);
             RollForwardToTick(realCurrentTick);
         } else {
-            snakeEvents.AddOrReplaceAtTick(tick, changeDirectionEvent);
+            snakeEvents.AddOrReplaceAtTick(tick, snakeEvent);
         }
 
         UpdateTickText();
