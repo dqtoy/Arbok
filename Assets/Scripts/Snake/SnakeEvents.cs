@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 public class SnakeEvents {
-    Dictionary<int, SnakeCompoundEvent> dict = new Dictionary<int, SnakeCompoundEvent>();
+    public Dictionary<int, SnakeCompoundEvent> dict = new Dictionary<int, SnakeCompoundEvent>();
 
     public void AddOrReplaceAtTick(int tick, SnakeEvent snakeEvent) {
         if (dict.ContainsKey(tick) == false) {
@@ -28,10 +28,22 @@ public class SnakeEvents {
             dict[tick].Reverse(snake);
         }
     }
+
+    public override string ToString() {
+        String result = "";
+        foreach (var kvp1 in dict.Reverse()) {
+            result += kvp1.Key + ": ";
+            foreach (var kvp2 in kvp1.Value.events) {
+                result += kvp2.Value + " ";
+            }
+            result += "\n";
+        }
+        return result;
+    }
 }
 
 public class SnakeCompoundEvent : Dictionary<Type, SnakeEvent> {
-    Dictionary<Type, SnakeEvent> events = new Dictionary<Type, SnakeEvent>();
+    public Dictionary<Type, SnakeEvent> events = new Dictionary<Type, SnakeEvent>();
 
     public void AddOrReplaceEvent(SnakeEvent snakeEvent) {
         events[snakeEvent.GetType()] = snakeEvent;
@@ -94,6 +106,10 @@ class SnakeMoveEvent : SnakeEvent {
             newTail.transform.position = oldTailPosition;
         }
     }
+
+    public override string ToString() {
+        return "M";
+    }
 }
 
 public class SnakeChangeDirectionEvent : SnakeEvent {
@@ -114,6 +130,10 @@ public class SnakeChangeDirectionEvent : SnakeEvent {
 
     public void Reverse(Snake snake) {
         snake.currentDirection = previousDirection;
+    }
+
+    public override string ToString() {
+        return "T-" + newDirection;
     }
 
     private static bool invalidTurn(Direction currentDir, Direction newDir) {
@@ -147,5 +167,10 @@ public class SnakeEatAppleEvent : SnakeEvent {
         snake.links.Remove(firstTailLink);
         GameObject.Destroy(firstTailLink);
         apple.SetActive(true);
+    }
+
+
+    public override string ToString() {
+        return "E";
     }
 }

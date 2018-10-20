@@ -78,6 +78,7 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     void Update() {
         if (!isLocalPlayer) return;
+
         if (isLocalPlayer && Input.GetKeyDown(KeyCode.J)) {
             Destroy(snake.gameObject);
         }
@@ -93,6 +94,9 @@ public class NetworkSnakeController : NetworkBehaviour {
         }
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) {
             SendNewDirection(Left.I);
+        }
+        if (Input.GetKeyDown(KeyCode.Alpha0)) {
+            Toolbox.Log(snake.snakeEvents.ToString());
         }
     }
 
