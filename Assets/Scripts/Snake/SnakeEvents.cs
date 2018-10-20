@@ -34,7 +34,7 @@ public class SnakeEvents {
         foreach (var kvp1 in dict.Reverse()) {
             result += kvp1.Key + ": ";
             foreach (var kvp2 in kvp1.Value.events) {
-                result += kvp2.Value + " ";
+                result += kvp2 + " ";
             }
             result += "\n";
         }
@@ -42,22 +42,28 @@ public class SnakeEvents {
     }
 }
 
-public class SnakeCompoundEvent : Dictionary<Type, SnakeEvent> {
-    public Dictionary<Type, SnakeEvent> events = new Dictionary<Type, SnakeEvent>();
+public class SnakeCompoundEvent {
+    static List<Type> priorityMap = new List<Type> {
+        typeof(SnakeEatAppleEvent),
+        typeof(SnakeChangeDirectionEvent),
+        typeof(SnakeMoveEvent)
+    };
+
+    public SnakeEvent[] events = new SnakeEvent[priorityMap.Count()];
 
     public void AddOrReplaceEvent(SnakeEvent snakeEvent) {
-        events[snakeEvent.GetType()] = snakeEvent;
+        events[priorityMap.IndexOf(snakeEvent.GetType())] = snakeEvent;
     }
 
     public void Execute(Snake snake) {
-        foreach (var kvp in events) {
-            kvp.Value.Execute(snake);
+        foreach (var snakeEvent in events) {
+            snakeEvent?.Execute(snake);
         }
     }
 
     public void Reverse(Snake snake) {
-        foreach (var kvp in events.Reverse()) {
-            kvp.Value.Reverse(snake);
+        foreach (var snakeEvent in events.Reverse()) {
+            snakeEvent?.Reverse(snake);
         }
     }
 }
