@@ -21,6 +21,10 @@ public class AppleManager : MonoBehaviour {
 		all.ForEach(x => Destroy(x.gameObject));
 	}
 
+	public static void EnableAll() {
+		all.ForEach(x => x.gameObject.SetActive(true));
+	}
+
 	public void SpawnApple(AppleState state) {
 		var newApple = Instantiate(applePrefab, state.position, Quaternion.identity, transform);
 		newApple.SetActive(state.isActive);

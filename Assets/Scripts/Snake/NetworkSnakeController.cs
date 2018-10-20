@@ -39,6 +39,8 @@ public class NetworkSnakeController : NetworkBehaviour {
             JsonConvert.DeserializeObject<AppleState[]>(appleStatesJson).ToList().ForEach(apple => {
                 AppleManager.I.SpawnApple(apple);
             });
+        } else {
+            AppleManager.EnableAll();
         }
     }
 
@@ -76,6 +78,9 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     void Update() {
         if (!isLocalPlayer) return;
+        if (isLocalPlayer && Input.GetKeyDown(KeyCode.J)) {
+            Destroy(snake.gameObject);
+        }
 
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) {
             SendNewDirection(Up.I);

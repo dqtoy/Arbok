@@ -15,13 +15,13 @@ public class Game : MonoBehaviour {
 
     // Update is called once per frame
     void Update() {
-        if (Input.GetKeyDown(KeyCode.Alpha1)) {
-            Instantiate(snake);
-        }
-        if (Input.GetKeyDown(KeyCode.Alpha2)) {
-            Scene scene = SceneManager.GetActiveScene();
-            SceneManager.LoadScene(scene.name);
-        }
+        // if (Input.GetKeyDown(KeyCode.Alpha1)) {
+        //     Instantiate(snake);
+        // }
+        // if (Input.GetKeyDown(KeyCode.Alpha2)) {
+        //     Scene scene = SceneManager.GetActiveScene();
+        //     SceneManager.LoadScene(scene.name);
+        // }
     }
 
     void OnApplicationQuit() {

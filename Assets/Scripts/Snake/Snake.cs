@@ -8,7 +8,7 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class Snake : MonoBehaviour {
+public class Snake : NetworkBehaviour {
     public static List<Snake> all = new List<Snake>();
 
     public GameObject snakeTailPrefab;
@@ -35,9 +35,49 @@ public class Snake : MonoBehaviour {
     void Update() {
         elapsedTime += Time.deltaTime;
 
-        if (elapsedTime > (1 / movesPerSecond)) {
-            elapsedTime -= 1 / movesPerSecond;
+        // if (elapsedTime > (1 / movesPerSecond)) {
+        //     elapsedTime -= 1 / movesPerSecond;
+        //     DoTick();
+        // }
+
+        if (Input.GetKeyDown(KeyCode.N)) {
             DoTick();
+        }
+
+        if (Input.GetKeyDown(KeyCode.B)) {
+            RollbackTick();
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha1) && netId.Value == 1) {
+            if (Input.GetKey(KeyCode.LeftShift)) {
+                RollbackTick();
+            } else {
+                DoTick();
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha2) && netId.Value == 2) {
+            if (Input.GetKey(KeyCode.LeftShift)) {
+                RollbackTick();
+            } else {
+                DoTick();
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha3) && netId.Value == 3) {
+            if (Input.GetKey(KeyCode.LeftShift)) {
+                RollbackTick();
+            } else {
+                DoTick();
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Alpha4) && netId.Value == 4) {
+            if (Input.GetKey(KeyCode.LeftShift)) {
+                RollbackTick();
+            } else {
+                DoTick();
+            }
         }
         cameraTarget.position += Vector3.up * (links.Count + 1);
     }
@@ -121,8 +161,13 @@ public class Snake : MonoBehaviour {
 
     public void Die() {
         Debug.Log("DIE");
-        all.Remove(this);
         Destroy(gameObject);
+        // Hide visible parts
+        // Stop moving/ticking
+    }
+
+    void OnDestroy() {
+        all.Remove(this);
     }
 
     void OnTriggerEnter(Collider other) {
