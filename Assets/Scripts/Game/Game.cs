@@ -6,8 +6,6 @@ using UnityEngine.SceneManagement;
 public class Game : MonoBehaviour {
     public static Game I;
 
-    public GameObject applePrefab;
-
     public GameObject snake;
 
     // Use this for initialization
@@ -30,9 +28,5 @@ public class Game : MonoBehaviour {
         PlayerPrefs.SetInt("Screenmanager Resolution Width", 800);
         PlayerPrefs.SetInt("Screenmanager Resolution Height", 600);
         PlayerPrefs.SetInt("Screenmanager Is Fullscreen mode", 0);
-    }
-
-    public GameObject SpawnApple() {
-        return Instantiate(applePrefab);
     }
 }

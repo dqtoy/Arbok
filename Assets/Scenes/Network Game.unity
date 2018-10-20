@@ -5285,8 +5285,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 262a61711b7bb4a3ebb58113b79e74c6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  applePrefab: {fileID: 1413406949541522, guid: 3d3c9a27c87b04822bccd5080e35c146,
-    type: 2}
   snake: {fileID: 0}
 --- !u!4 &1221986594
 Transform:
@@ -6084,6 +6082,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1571756525}
+  - component: {fileID: 1571756526}
   m_Layer: 0
   m_Name: Apples
   m_TagString: Untagged
@@ -6256,6 +6255,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 7
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1571756526
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1571756524}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9766829691bc5dd4eb80a4db3fd7ce8b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  applePrefab: {fileID: 1413406949541522, guid: 3d3c9a27c87b04822bccd5080e35c146,
+    type: 2}
 --- !u!1001 &1583584358
 Prefab:
   m_ObjectHideFlags: 0

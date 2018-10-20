@@ -19,6 +19,27 @@ public class NetworkSnakeController : NetworkBehaviour {
         CmdRequestSnakePositions();
         netIdUI.text = netId.ToString() + "*";
         MainCamera.I.target = snake.cameraTarget;
+        CmdRequestApplePositions();
+    }
+
+    [Command]
+    public void CmdRequestApplePositions() {
+        Debug.Log("CmdRequestApplePositions");
+        TargetReceiveApplePositions(
+            connectionToClient,
+            JsonConvert.SerializeObject(AppleManager.all.Select(x => x.ToState()).ToArray())
+        );
+    }
+
+    [TargetRpc]
+    public void TargetReceiveApplePositions(NetworkConnection connection, string appleStatesJson) {
+        Debug.Log("TargetReceiveApplePositions: isServer: " + isServer);
+        if (!isServer) {
+            AppleManager.DestroyAll();
+            JsonConvert.DeserializeObject<AppleState[]>(appleStatesJson).ToList().ForEach(apple => {
+                AppleManager.I.SpawnApple(apple);
+            });
+        }
     }
 
     [Command]
@@ -72,7 +93,6 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     void SendNewDirection(Direction direction) {
         snake.ChangeDirectionAtNextTick(direction);
-        Debug.Log("direction: " + direction.Serialize());
         CmdKeyDown(direction.Serialize(), snake.currentTick + 1);
     }
 

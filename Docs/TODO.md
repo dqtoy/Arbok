@@ -17,5 +17,17 @@ PHASE ARBOK
 - [ ] border slowly shrinking, or falling away
 - [x] move camera with snake
 - [x] zoom out camera based on snake length
-- [ ] sync apples on join match
+- [x] sync apples on join match
+- [ ] cleanup on leave match
+    - [ ] camera
+    - [ ] apples
+    - [ ] snakes
+- [ ] support leaving and rejoining a match
+    - [ ] camera
+    - [ ] apples
+    - [ ] snakes
+
+## Possible Issues
+- Apple syncing
+    - if snake eats an apple or something right when a new player joins, that apple might still show as active on the new players client
 
