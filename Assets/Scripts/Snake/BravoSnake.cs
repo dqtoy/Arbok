@@ -95,25 +95,22 @@ public class BravoSnake : NetworkBehaviour {
 
     void Move() {
         Vector3 newPosition = Vector3.zero;
-        if (isLocalPlayer)
-        {
+        if (isLocalPlayer) {
             newPosition = networkHead.transform.position + currentDirection.GetMoveVector();
 
-            if (AboutToCollideWithSelf(this, newPosition))
-            {
+            if (AboutToCollideWithSelf(this, newPosition)) {
                 Die();
+            }
+
+            if (links.Count > 0) {
+                var oldTail = links.Last();
+                links.RemoveAt(links.Count - 1);
+                links.Insert(0, oldTail);
+                oldTail.transform.position = snakeHead.transform.position;
             }
         }
 
-        if (links.Count > 0) {
-            var oldTail = links.Last();
-            links.RemoveAt(links.Count - 1);
-            links.Insert(0, oldTail);
-            oldTail.transform.position = snakeHead.transform.position;
-        }
-
-        if (isLocalPlayer)
-        {
+        if (isLocalPlayer) {
             networkHead.transform.position = newPosition;
         }
 
@@ -133,9 +130,7 @@ public class BravoSnake : NetworkBehaviour {
     }
 
     void EatApple(GameObject apple) {
-        apple.SetActive(false);
-        var newTail = Instantiate(snakeTailPrefab, transform);
-        links.Add(newTail);
+        Foo(apple);
         String appleId = apple.name;
         CmdEatApple(appleId);
     }
@@ -149,10 +144,20 @@ public class BravoSnake : NetworkBehaviour {
     public void RpcEatApple(String appleId) {
         if (!isLocalPlayer) {
             GameObject apple = GameObject.Find(appleId);
-            apple.SetActive(false);
-            var newTail = Instantiate(snakeTailPrefab, transform);
-            links.Add(newTail);
+            Foo(apple);
         }
+    }
+
+    void Foo(GameObject apple) {
+        apple.SetActive(false);
+        var newTail = Instantiate(snakeTailPrefab, transform);
+        links.Add(newTail);
+        gameObject.SetActive(false);
+        var netTransChild = gameObject.AddComponent<NetworkTransformChild>();
+        netTransChild.target = newTail.transform;
+        netTransChild.interpolateMovement = 1;
+        netTransChild.interpolateRotation = 1;
+        gameObject.SetActive(true);
     }
 
     // public void SetSnakeData(SnakeState state) {
