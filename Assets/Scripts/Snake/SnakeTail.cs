@@ -4,13 +4,7 @@ using UnityEngine;
 
 public class SnakeTail : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    public void SetPos(Vector3 newPos) {
+        transform.position = newPos;
+    }
 }

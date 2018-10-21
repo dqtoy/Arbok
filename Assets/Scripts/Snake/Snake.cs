@@ -200,7 +200,7 @@ public class Snake : NetworkBehaviour {
     }
 
     void OnTriggerEnter(Collider other) {
-        if (other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeTail>())) {
+        if (other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeTailContainer>())) {
             Die();
         }
     }

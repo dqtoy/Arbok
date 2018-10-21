@@ -10,15 +10,13 @@ public class SnakeHead : MonoBehaviour {
         visual = transform.Find("Visual").gameObject;
     }
 
-    // Use this for initialization
-    void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    public void SetPos(Vector3 newPos) {
+        transform.position = newPos;
+    }
+
+    public void Move(Direction direction) {
+        transform.position = transform.position + direction.GetMoveVector();
+    }
 
     public void SetRotationOfVisual(Quaternion quaternion) {
         visual.transform.rotation = quaternion;
