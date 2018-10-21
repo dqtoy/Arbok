@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 
 public class SnakeEvents {
-    public Dictionary<int, SnakeCompoundEvent> dict = new Dictionary<int, SnakeCompoundEvent>();
+    public SortedDictionary<int, SnakeCompoundEvent> dict = new SortedDictionary<int, SnakeCompoundEvent>();
 
     public void AddOrReplaceAtTick(int tick, SnakeEvent snakeEvent) {
         if (dict.ContainsKey(tick) == false) {
@@ -132,7 +132,7 @@ class SnakeMoveEvent : SnakeEvent {
 
 public class SnakeChangeDirectionEvent : SnakeEvent {
     Direction previousDirection = DummyDirection.I;
-    Direction newDirection;
+    public Direction newDirection { get; private set; }
 
     public SnakeChangeDirectionEvent(Direction newDirection) {
         this.newDirection = newDirection;

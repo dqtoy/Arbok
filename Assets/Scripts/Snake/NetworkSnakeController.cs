@@ -9,6 +9,8 @@ using UnityEngine.UI;
 public class NetworkSnakeController : NetworkBehaviour {
     public Text netIdUI;
 
+    public string[] receivedEvents = new string[0];
+
     Snake snake;
 
     public void Awake() {
@@ -115,8 +117,13 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     [ClientRpc]
     public void RpcKeyDown(byte newDirection, int tick) {
+
         if (!isLocalPlayer) {
-            snake.CorrectEventAtTick(new SnakeChangeDirectionEvent(Direction.Deserialize(newDirection)), tick);
+            var snakeEvent = new SnakeChangeDirectionEvent(Direction.Deserialize(newDirection));
+            var x = receivedEvents.ToList();
+            x.Add(snakeEvent.newDirection.GetType().ToString());
+            receivedEvents = x.ToArray();
+            snake.CorrectEventAtTick(snakeEvent, tick);
         }
     }
 }

@@ -40,6 +40,10 @@ public class Snake : NetworkBehaviour {
     void Update() {
         elapsedTime += Time.deltaTime;
 
+        if (Input.GetKeyDown(KeyCode.P)) {
+            manualTickDebugMode = !manualTickDebugMode;
+        }
+
         if (manualTickDebugMode) {
             if (Input.GetKeyDown(KeyCode.N)) {
                 DoTick();

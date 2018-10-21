@@ -1137,7 +1137,7 @@ MonoBehaviour:
   head: {fileID: 114233895364493278}
   cameraTarget: {fileID: 4225858558487920}
   tickUI: {fileID: 114021671399753930}
-  movesPerSecond: 10
+  movesPerSecond: 5
   manualTickDebugMode: 0
 --- !u!114 &114379010013504446
 MonoBehaviour:
@@ -1199,6 +1199,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   netIdUI: {fileID: 114239187431683028}
+  receivedEvents: []
 --- !u!114 &114921518613770482
 MonoBehaviour:
   m_ObjectHideFlags: 1
