@@ -19,6 +19,7 @@ public class AppleManager : MonoBehaviour {
 
 	public static void DestroyAll() {
 		all.ForEach(x => Destroy(x.gameObject));
+		all.Clear();
 	}
 
 	public static void EnableAll() {

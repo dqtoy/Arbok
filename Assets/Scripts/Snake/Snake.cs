@@ -149,6 +149,8 @@ public class Snake : NetworkBehaviour {
     }
 
     void DoTick() {
+        DoAppleEatCheck();
+
         currentTick++;
         UpdateTickText();
 
@@ -157,6 +159,18 @@ public class Snake : NetworkBehaviour {
         snakeEvents.ExecuteEventsAtTickIfAny(currentTick, this);
 
         AfterTick?.Invoke();
+    }
+
+    void DoAppleEatCheck() {
+        AppleManager.all.ForEach(x => {
+            if (x.transform.position == head.transform.position) {
+                EatApple(x.gameObject);
+            }
+        });
+    }
+
+    void EatApple(GameObject apple) {
+        snakeEvents.AddOrReplaceAtTick(currentTick + 1, new SnakeEatAppleEvent(apple));
     }
 
     void RollbackTick() {
@@ -189,12 +203,5 @@ public class Snake : NetworkBehaviour {
         if (other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeTail>())) {
             Die();
         }
-        if (other.gameObject.HasComponent<Apple>()) {
-            EatApple(other.gameObject);
-        }
-    }
-
-    void EatApple(GameObject apple) {
-        snakeEvents.AddOrReplaceAtTick(currentTick + 1, new SnakeEatAppleEvent(apple));
     }
 }
