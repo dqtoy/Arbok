@@ -1238,7 +1238,7 @@ MonoBehaviour:
   networkHead: {fileID: 1166417770060682}
   cameraTarget: {fileID: 4225858558487920}
   tickUI: {fileID: 114021671399753930}
-  movesPerSecond: 20
+  movesPerSecond: 10
 --- !u!135 &135280331152753486
 SphereCollider:
   m_ObjectHideFlags: 1

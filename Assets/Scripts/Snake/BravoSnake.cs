@@ -130,7 +130,7 @@ public class BravoSnake : NetworkBehaviour {
     }
 
     void EatApple(GameObject apple) {
-        Foo(apple);
+        KillAppleNewTail(apple);
         String appleId = apple.name;
         CmdEatApple(appleId);
     }
@@ -144,20 +144,32 @@ public class BravoSnake : NetworkBehaviour {
     public void RpcEatApple(String appleId) {
         if (!isLocalPlayer) {
             GameObject apple = GameObject.Find(appleId);
-            Foo(apple);
+            KillAppleNewTail(apple);
         }
     }
 
-    void Foo(GameObject apple) {
+    void KillAppleNewTail(GameObject apple) {
         apple.SetActive(false);
-        var newTail = Instantiate(snakeTailPrefab, transform);
+        NewTail();
+    }
+
+    readonly Vector3 zeroVector = Vector3.zero;
+
+    GameObject NewTail() {
+        return NewTail(Vector3.zero);
+    }
+
+    GameObject NewTail(Vector3 position) {
+        var newTail = Instantiate(snakeTailPrefab, position, Quaternion.identity, transform);
         links.Add(newTail);
         gameObject.SetActive(false);
         var netTransChild = gameObject.AddComponent<NetworkTransformChild>();
         netTransChild.target = newTail.transform;
         netTransChild.interpolateMovement = 1;
         netTransChild.interpolateRotation = 1;
+        // netTransChild.sendInterval = 29;
         gameObject.SetActive(true);
+        return newTail;
     }
 
     // public void SetSnakeData(SnakeState state) {
@@ -167,6 +179,10 @@ public class BravoSnake : NetworkBehaviour {
     //     this.currentDirection = state.direction;
     //     this.links = state.linkPositions.Select(x => Instantiate(snakeTailPrefab, x, Quaternion.identity, this.transform)).ToList();
     // }
+
+    public void SetSnakeData(SnakeState state) {
+        this.links = state.linkPositions.Select(x => NewTail(x)).ToList();
+    }
 
     public void Die() {
         Toolbox.Log("DIE");
