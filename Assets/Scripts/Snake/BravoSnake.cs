@@ -12,7 +12,8 @@ public class BravoSnake : NetworkBehaviour {
     public static List<BravoSnake> all = new List<BravoSnake>();
 
     public GameObject snakeTailPrefab;
-    public SnakeHead head;
+    public SnakeHead snakeHead;
+    public GameObject networkHead;
     public Transform cameraTarget;
     public Text tickUI;
     public float movesPerSecond = 5;
@@ -33,9 +34,10 @@ public class BravoSnake : NetworkBehaviour {
     }
 
     void Update() {
-        if (!isLocalPlayer) return;
 
-        DoChangeDirection();
+        if (isLocalPlayer) {
+            DoChangeDirection();
+        }
 
         elapsedTime += Time.deltaTime;
 
@@ -59,7 +61,7 @@ public class BravoSnake : NetworkBehaviour {
             currentDirection = newDirection;
         }
 
-        head.SetRotationOfVisual(currentDirection.GetHeadRotation());
+        snakeHead.SetRotationOfVisual(currentDirection.GetHeadRotation());
     }
 
     private static bool invalidTurn(Direction currentDir, Direction newDir) {
@@ -79,7 +81,9 @@ public class BravoSnake : NetworkBehaviour {
     }
 
     void DoTick() {
-        DoAppleEatCheck();
+        if (isLocalPlayer) {
+            DoAppleEatCheck();
+        }
 
         currentTick++;
         UpdateTickText();
@@ -90,20 +94,30 @@ public class BravoSnake : NetworkBehaviour {
     }
 
     void Move() {
-        Vector3 newPosition = head.transform.position + currentDirection.GetMoveVector();
+        Vector3 newPosition = Vector3.zero;
+        if (isLocalPlayer)
+        {
+            newPosition = networkHead.transform.position + currentDirection.GetMoveVector();
 
-        if (AboutToCollideWithSelf(this, newPosition)) {
-            Die();
+            if (AboutToCollideWithSelf(this, newPosition))
+            {
+                Die();
+            }
         }
 
         if (links.Count > 0) {
             var oldTail = links.Last();
             links.RemoveAt(links.Count - 1);
             links.Insert(0, oldTail);
-            oldTail.transform.position = head.transform.position;
+            oldTail.transform.position = snakeHead.transform.position;
         }
 
-        head.transform.position = newPosition;
+        if (isLocalPlayer)
+        {
+            networkHead.transform.position = newPosition;
+        }
+
+        snakeHead.transform.position = networkHead.transform.position;
     }
 
     private bool AboutToCollideWithSelf(BravoSnake snake, Vector3 newPosition) {
@@ -112,7 +126,7 @@ public class BravoSnake : NetworkBehaviour {
 
     void DoAppleEatCheck() {
         AppleManager.all.ForEach(x => {
-            if (x.transform.position == head.transform.position) {
+            if (x.transform.position == snakeHead.transform.position) {
                 EatApple(x.gameObject);
             }
         });
@@ -120,8 +134,25 @@ public class BravoSnake : NetworkBehaviour {
 
     void EatApple(GameObject apple) {
         apple.SetActive(false);
-        var newTail = GameObject.Instantiate(snakeTailPrefab, transform);
+        var newTail = Instantiate(snakeTailPrefab, transform);
         links.Add(newTail);
+        String appleId = apple.name;
+        CmdEatApple(appleId);
+    }
+
+    [Command]
+    private void CmdEatApple(String appleId) {
+        RpcEatApple(appleId);
+    }
+
+    [ClientRpc]
+    public void RpcEatApple(String appleId) {
+        if (!isLocalPlayer) {
+            GameObject apple = GameObject.Find(appleId);
+            apple.SetActive(false);
+            var newTail = Instantiate(snakeTailPrefab, transform);
+            links.Add(newTail);
+        }
     }
 
     // public void SetSnakeData(SnakeState state) {

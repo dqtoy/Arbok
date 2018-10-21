@@ -117,7 +117,6 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     [ClientRpc]
     public void RpcKeyDown(byte newDirection, int tick) {
-
         if (!isLocalPlayer) {
             var snakeEvent = new SnakeChangeDirectionEvent(Direction.Deserialize(newDirection));
             var x = receivedEvents.ToList();

@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.4429537, g: 0.492131, b: 0.5718718, a: 1}
+  m_IndirectSpecularColor: {r: 0.44295344, g: 0.49213082, b: 0.5718716, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -2735,11 +2735,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146,
     type: 2}
   m_PrefabInternal: {fileID: 686538702}
---- !u!4 &691368309 stripped
-Transform:
-  m_CorrespondingSourceObject: {fileID: 4848136547368594, guid: bf9aaefbcb64dd342a1c17246769a786,
-    type: 2}
-  m_PrefabInternal: {fileID: 1892219989}
 --- !u!1001 &695103343
 Prefab:
   m_ObjectHideFlags: 0
@@ -6148,51 +6143,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146,
     type: 2}
   m_PrefabInternal: {fileID: 1419583901}
---- !u!1 &1437517113 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1999735503848270, guid: bf9aaefbcb64dd342a1c17246769a786,
-    type: 2}
-  m_PrefabInternal: {fileID: 1892219989}
---- !u!114 &1437517114
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1437517113}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1267208747, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Target: {fileID: 691368309}
-  m_ChildIndex: 0
-  m_SendInterval: 0.1
-  m_SyncRotationAxis: 2
-  m_RotationSyncCompression: 0
-  m_MovementThreshold: 0.001
-  m_InterpolateRotation: 1
-  m_InterpolateMovement: 1
---- !u!114 &1437517115
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1437517113}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: -1768714887, guid: dc443db3e92b4983b9738c1131f555cb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_TransformSyncMode: 0
-  m_SendInterval: 0
-  m_SyncRotationAxis: 7
-  m_RotationSyncCompression: 0
-  m_SyncSpin: 0
-  m_MovementTheshold: 0.001
-  m_VelocityThreshold: 0.0001
-  m_SnapThreshold: 5
-  m_InterpolateRotation: 1
-  m_InterpolateMovement: 1
 --- !u!1001 &1494348538
 Prefab:
   m_ObjectHideFlags: 0
@@ -8086,6 +8036,10 @@ Prefab:
     - target: {fileID: 4939979279394010, guid: bf9aaefbcb64dd342a1c17246769a786, type: 2}
       propertyPath: m_RootOrder
       value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 1999735503848270, guid: bf9aaefbcb64dd342a1c17246769a786, type: 2}
+      propertyPath: m_IsActive
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: bf9aaefbcb64dd342a1c17246769a786, type: 2}
