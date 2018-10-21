@@ -6,7 +6,7 @@ using UnityEngine.SceneManagement;
 public class Game : MonoBehaviour {
     public static Game I;
 
-    public GameObject snake;
+    // public GameObject snake;
 
     // Use this for initialization
     void Awake() {
