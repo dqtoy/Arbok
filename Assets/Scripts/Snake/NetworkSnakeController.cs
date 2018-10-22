@@ -54,7 +54,6 @@ public class NetworkSnakeController : NetworkBehaviour {
                 TargetReceiveSnakePosition(
                     connectionToClient,
                     x.head.transform.position,
-                    x.currentTick,
                     x.currentDirection.Serialize(),
                     linksJson,
                     x.GetComponent<NetworkIdentity>().netId
@@ -64,17 +63,15 @@ public class NetworkSnakeController : NetworkBehaviour {
     }
 
     [TargetRpc]
-    public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, int tick, short direction, string linksJson, NetworkInstanceId netId) {
+    public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, short direction, string linksJson, NetworkInstanceId netId) {
         if (netId == this.netId) return;
 
         var snakeToModify = Snake.all.First(x => x.GetComponent<NetworkIdentity>().netId == netId);
 
         snakeToModify.SetSnakeData(new SnakeState() {
             linkPositions = JsonConvert.DeserializeObject<Vector3[]>(linksJson),
-                tick = tick,
                 headPosition = position,
-                direction = Direction.Deserialize(direction),
-                elapsedTime = 0
+                direction = Direction.Deserialize(direction)
         });
     }
 
@@ -104,7 +101,7 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     void SendNewDirection(Direction direction) {
         snake.ChangeDirectionAtNextTick(direction);
-        CmdKeyDown(direction.Serialize(), snake.currentTick + 1);
+        CmdKeyDown(direction.Serialize(), GlobalTick.I.currentTick + 1);
     }
 
     // ==============================

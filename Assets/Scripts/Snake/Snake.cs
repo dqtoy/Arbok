@@ -14,149 +14,58 @@ public class Snake : NetworkBehaviour {
     public GameObject snakeTailPrefab;
     public SnakeHead head;
     public Transform cameraTarget;
-    public Text tickUI;
-    public float movesPerSecond = 5;
 
     public Direction currentDirection = Up.I;
 
     public SnakeEvents snakeEvents { get; private set; }
     public List<GameObject> links { get; private set; }
-    public int currentTick { get; private set; }
 
     public event Action AfterTick;
     public event Action AfterRollbackTick;
 
-    public bool manualTickDebugMode = false;
-
-    float elapsedTime = 0;
+    public float cameraScalingMod = 1;
 
     void Awake() {
         snakeEvents = new SnakeEvents();
         links = new List<GameObject>();
-        currentTick = 0;
         all.Add(this);
     }
 
-    void Update() {
-        elapsedTime += Time.deltaTime;
-
-        if (Input.GetKeyDown(KeyCode.P)) {
-            manualTickDebugMode = !manualTickDebugMode;
-        }
-
-        if (manualTickDebugMode) {
-            if (Input.GetKeyDown(KeyCode.N)) {
-                DoTick();
-            }
-
-            if (Input.GetKeyDown(KeyCode.B)) {
-                RollbackTick();
-            }
-
-            if (Input.GetKeyDown(KeyCode.Alpha1) && netId.Value == 1) {
-                if (Input.GetKey(KeyCode.LeftShift)) {
-                    RollbackTick();
-                } else {
-                    DoTick();
-                }
-            }
-
-            if (Input.GetKeyDown(KeyCode.Alpha2) && netId.Value == 2) {
-                if (Input.GetKey(KeyCode.LeftShift)) {
-                    RollbackTick();
-                } else {
-                    DoTick();
-                }
-            }
-
-            if (Input.GetKeyDown(KeyCode.Alpha3) && netId.Value == 3) {
-                if (Input.GetKey(KeyCode.LeftShift)) {
-                    RollbackTick();
-                } else {
-                    DoTick();
-                }
-            }
-
-            if (Input.GetKeyDown(KeyCode.Alpha4) && netId.Value == 4) {
-                if (Input.GetKey(KeyCode.LeftShift)) {
-                    RollbackTick();
-                } else {
-                    DoTick();
-                }
-            }
-        } else {
-            if (elapsedTime > (1 / movesPerSecond)) {
-                elapsedTime -= 1 / movesPerSecond;
-                DoTick();
-            }
-        }
-
-        cameraTarget.position += Vector3.up * (links.Count + 1);
+    void Start() {
+        GlobalTick.I.OnDoTick += DoTick;
+        GlobalTick.I.OnRollbackTick += RollbackTick;
     }
 
-    void UpdateTickText() {
-        tickUI.text = currentTick.ToString();
+    void Update() {
+        // cameraTarget.position += Vector3.up * (links.Count + 1);
+        cameraTarget.localScale = new Vector3(links.Count * cameraScalingMod, 1, 1);
     }
 
     public void ChangeDirectionAtNextTick(Direction newDirection) {
-        snakeEvents.AddOrReplaceAtTick(currentTick + 1, new SnakeChangeDirectionEvent(newDirection));
+        snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick + 1, new SnakeChangeDirectionEvent(newDirection));
     }
 
     public void CorrectEventAtTick(SnakeEvent snakeEvent, int tick) {
-        var missedTick = tick <= this.currentTick;
+        var missedTick = tick <= GlobalTick.I.currentTick;
 
         if (missedTick) {
-            var realCurrentTick = currentTick;
-            var rolledBackCount = RollbackToTick(tick - 1);
-            snakeEvents.PurgeTicksAfterTick(currentTick);
+            var realCurrentTick = GlobalTick.I.currentTick;
+            var rolledBackCount = GlobalTick.I.RollbackToTick(tick - 1);
+            snakeEvents.PurgeTicksAfterTick(GlobalTick.I.currentTick);
             snakeEvents.AddOrReplaceAtTick(tick, snakeEvent);
-            RollForwardToTick(realCurrentTick);
+            GlobalTick.I.RollForwardToTick(realCurrentTick);
         } else {
             snakeEvents.AddOrReplaceAtTick(tick, snakeEvent);
+            // TODO If this happens, then we are behind and need to fastforward
         }
-
-        UpdateTickText();
-    }
-
-    public Vector3 GetHeadPositionAtTick(int tick) {
-        Toolbox.Log("GetHeadPositionAtTick A " + currentTick + " | " + JsonConvert.SerializeObject(head.transform.position));
-        var realCurrentTick = currentTick;
-        RollbackToTick(tick);
-        Toolbox.Log("GetHeadPositionAtTick B " + currentTick + " | " + JsonConvert.SerializeObject(head.transform.position));
-        var x = head.transform.position;
-        RollForwardToTick(realCurrentTick);
-        Toolbox.Log("GetHeadPositionAtTick C " + currentTick + " | " + JsonConvert.SerializeObject(head.transform.position));
-
-        return x;
-    }
-
-    void RollForwardToTick(int tick) {
-        while (currentTick < tick) {
-            DoTick();
-        }
-    }
-
-    int RollbackToTick(int tickToRollbackTo) {
-        Toolbox.Log("RollbackToTick " + tickToRollbackTo);
-        var rolledBackCount = 0;
-
-        while (this.currentTick != tickToRollbackTo) {
-            RollbackTick();
-            rolledBackCount++;
-        }
-
-        return rolledBackCount;
     }
 
     void DoTick() {
         DoAppleEatCheck();
 
-        currentTick++;
-        UpdateTickText();
+        snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick, new SnakeMoveEvent());
 
-        snakeEvents.AddOrReplaceAtTick(currentTick, new SnakeMoveEvent());
-
-        snakeEvents.ExecuteEventsAtTickIfAny(currentTick, this);
+        snakeEvents.ExecuteEventsAtTickIfAny(GlobalTick.I.currentTick, this);
 
         AfterTick?.Invoke();
     }
@@ -170,22 +79,25 @@ public class Snake : NetworkBehaviour {
     }
 
     void EatApple(GameObject apple) {
-        snakeEvents.AddOrReplaceAtTick(currentTick + 1, new SnakeEatAppleEvent(apple));
+        snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick, new SnakeEatAppleEvent(apple));
     }
 
     void RollbackTick() {
         Toolbox.Log("RollbackTick");
-        snakeEvents.ReverseEventsAtTickIfAny(currentTick, this);
-        currentTick--;
+        snakeEvents.ReverseEventsAtTickIfAny(GlobalTick.I.currentTick, this);
         AfterRollbackTick?.Invoke();
     }
 
     public void SetSnakeData(SnakeState state) {
         this.head.transform.position = state.headPosition;
-        this.currentTick = state.tick;
-        this.elapsedTime = state.elapsedTime;
         this.currentDirection = state.direction;
         this.links = state.linkPositions.Select(x => Instantiate(snakeTailPrefab, x, Quaternion.identity, this.transform)).ToList();
+    }
+
+    void OnTriggerEnter(Collider other) {
+        if (other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeTail>())) {
+            Die();
+        }
     }
 
     public void Die() {
@@ -197,11 +109,7 @@ public class Snake : NetworkBehaviour {
 
     void OnDestroy() {
         all.Remove(this);
-    }
-
-    void OnTriggerEnter(Collider other) {
-        if (other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeTail>())) {
-            Die();
-        }
+        GlobalTick.I.OnDoTick -= DoTick;
+        GlobalTick.I.OnRollbackTick -= RollbackTick;
     }
 }
