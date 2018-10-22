@@ -46,11 +46,11 @@ public class GlobalTick : NetworkBehaviour {
 	}
 
 	[ClientRpc]
-	void RpcReceiveTickSync(int tick, float serverCurrentTickElapsedTime) {
-		if (tick > currentTick) {
-			RollForwardToTick(tick);
-		} else if (tick < currentTick) {
-			RollbackToTick(tick);
+	void RpcReceiveTickSync(int serverTick, float serverCurrentTickElapsedTime) {
+		if (serverTick > currentTick) {
+			RollForwardToTick(serverTick);
+		} else if (serverTick < currentTick) {
+			elapsedTime -= (currentTick - serverTick) / ticksPerSecond;
 		}
 		// this.elapsedTime = serverCurrentTickElapsedTime + (NetworkManager.singleton.client.GetRTT() / 2f / 1000f);
 		// this.elapsedTime = 0;
@@ -95,7 +95,7 @@ public class GlobalTick : NetworkBehaviour {
 	}
 
 	public void RollForwardToTick(int tick) {
-		Toolbox.Log("RollbackToTick " + tick);
+		Toolbox.Log("RollForwardToTick " + tick);
 		while (currentTick < tick) {
 			DoTick();
 		}
