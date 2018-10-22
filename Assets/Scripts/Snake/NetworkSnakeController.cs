@@ -17,6 +17,10 @@ public class NetworkSnakeController : NetworkBehaviour {
         snake = GetComponent<Snake>();
     }
 
+    public void Start() {
+        netIdUI.text = netId.ToString();
+    }
+
     public override void OnStartLocalPlayer() {
         CmdRequestSnakePositions();
         netIdUI.text = netId.ToString() + "*";

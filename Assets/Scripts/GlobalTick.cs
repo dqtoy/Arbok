@@ -41,17 +41,19 @@ public class GlobalTick : NetworkBehaviour {
 	IEnumerator SyncTickLoop() {
 		while (true) {
 			yield return new WaitForSeconds(1);
-			RpcReceiveTickSync(currentTick);
+			RpcReceiveTickSync(currentTick, elapsedTime);
 		}
 	}
 
 	[ClientRpc]
-	void RpcReceiveTickSync(int tick) {
+	void RpcReceiveTickSync(int tick, float serverCurrentTickElapsedTime) {
 		if (tick > currentTick) {
 			RollForwardToTick(tick);
 		} else if (tick < currentTick) {
 			RollbackToTick(tick);
 		}
+		// this.elapsedTime = serverCurrentTickElapsedTime + (NetworkManager.singleton.client.GetRTT() / 2f / 1000f);
+		// this.elapsedTime = 0;
 	}
 
 	void Update() {
@@ -84,6 +86,12 @@ public class GlobalTick : NetworkBehaviour {
 		currentTick++;
 
 		OnDoTick?.Invoke();
+
+		if (currentTick / 10 % 2 == 0) {
+			DebugScreen.I.SetPlaneRed();
+		} else {
+			DebugScreen.I.SetPlaneBlue();
+		}
 	}
 
 	public void RollForwardToTick(int tick) {
@@ -120,20 +128,22 @@ public class GlobalTick : NetworkBehaviour {
 	[Server]
 	public void InitTickForNewClient(NetworkConnection connection) {
 		Debug.Log("InitTickForNewClient");
-		TargetInitTick(connection, currentTick);
+		TargetInitTick(connection, currentTick, elapsedTime);
 	}
 
 	[TargetRpc]
-	public void TargetInitTick(NetworkConnection connection, int tick) {
+	public void TargetInitTick(NetworkConnection connection, int tick, float serverCurrentTickElapsedTime) {
 		Debug.Log("RpcInitTick");
-		Init(tick);
+		Init(tick, serverCurrentTickElapsedTime);
 	}
 
-	public void Init(int tick) {
+	public void Init(int tick, float serverCurrentTickElapsedTime) {
 		Debug.Log("Init");
 		currentTick = tick;
 		initialized = true;
 		elapsedTime += NetworkManager.singleton.client.GetRTT() / 2;
+		// elapsedTime = serverCurrentTickElapsedTime + (NetworkManager.singleton.client.GetRTT() / 2f / 1000f);
+		// elapsedTime = 0;
 		BlockFloor.I.StartDropping();
 	}
 }

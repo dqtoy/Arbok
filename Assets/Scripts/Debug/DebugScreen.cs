@@ -9,6 +9,9 @@ public class DebugScreen : MonoBehaviour {
 
     public Text globalTickText;
     public Text globalTickNetID;
+    public Material redMat;
+    public Material blueMat;
+    public GameObject plane;
 
     Text text;
 
@@ -38,11 +41,23 @@ public class DebugScreen : MonoBehaviour {
     }
 
     void HandleLog(string logString, string stackTrace, LogType type) {
+
+        if (text.text.Length > 2000) {
+            text.text = "";
+        }
         if (type == LogType.Error || type == LogType.Exception) {
             text.text = stackTrace + "\n" + text.text;
         }
         text.text = logString + "\n" + text.text;
         output = logString;
         stack = stackTrace;
+    }
+
+    public void SetPlaneRed() {
+        plane.GetComponent<MeshRenderer>().material = redMat;
+    }
+
+    public void SetPlaneBlue() {
+        plane.GetComponent<MeshRenderer>().material = blueMat;
     }
 }
