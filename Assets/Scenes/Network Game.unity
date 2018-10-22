@@ -3191,7 +3191,7 @@ MonoBehaviour:
     type: 2}
   killBlockPrefab: {fileID: 1443596318822380, guid: d2dd8e51972657649b32e9f712c4bd4b,
     type: 2}
-  size: 15
+  size: 50
   minRandomTorque: -10
   maxRandomTorque: 10
   blockPushAwayForce: 1
