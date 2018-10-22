@@ -134,5 +134,6 @@ public class GlobalTick : NetworkBehaviour {
 		currentTick = tick;
 		initialized = true;
 		elapsedTime += NetworkManager.singleton.client.GetRTT() / 2;
+		BlockFloor.I.StartDropping();
 	}
 }

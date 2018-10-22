@@ -11,16 +11,20 @@ public class SnakeHead : MonoBehaviour {
     }
 
     // Use this for initialization
-    void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
-	}
+    void Start() {
+
+    }
+
+    // Update is called once per frame
+    void Update() {
+
+    }
 
     public void SetRotationOfVisual(Quaternion quaternion) {
         visual.transform.rotation = quaternion;
+    }
+
+    public Quaternion GetRotationOfVisual() {
+        return visual.transform.rotation;
     }
 }

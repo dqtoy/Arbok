@@ -103,6 +103,11 @@ class SnakeMoveEvent : SnakeEvent {
             snake.links.Insert(0, oldTail);
             oldTailPosition = oldTail.transform.position;
             oldTail.transform.position = snake.head.transform.position;
+            oldTail.transform.rotation = Quaternion.Euler(new Vector3(
+                oldTail.transform.rotation.eulerAngles.x,
+                snake.head.GetRotationOfVisual().eulerAngles.y,
+                oldTail.transform.rotation.eulerAngles.z
+            ));
         }
 
         snake.head.transform.position = newPosition;
