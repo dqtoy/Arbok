@@ -379,12 +379,12 @@ GameObject:
   - component: {fileID: 57098891}
   - component: {fileID: 57098890}
   m_Layer: 0
-  m_Name: Plane
+  m_Name: RedBlueDebugPlane
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!23 &57098890
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -433,12 +433,12 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 57098888}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 3.28, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -1280, y: -355.22, z: 0}
   m_LocalScale: {x: 100, y: 1, z: 100}
   m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 13
+  m_Father: {fileID: 1907008718}
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &73480742
 Prefab:
@@ -3189,7 +3189,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   floorBlockPrefab: {fileID: 1222947905539912, guid: f0f086a3b5b0d0045925e58f54efec37,
     type: 2}
-  size: 50
+  killBlockPrefab: {fileID: 1443596318822380, guid: d2dd8e51972657649b32e9f712c4bd4b,
+    type: 2}
+  size: 10
   minRandomTorque: -10
   maxRandomTorque: 10
   blockPushAwayForce: 1
@@ -8656,6 +8658,7 @@ RectTransform:
   m_LocalScale: {x: 0, y: 0, z: 0}
   m_Children:
   - {fileID: 1319974989}
+  - {fileID: 57098892}
   m_Father: {fileID: 0}
   m_RootOrder: 8
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

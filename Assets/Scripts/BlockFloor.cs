@@ -5,6 +5,7 @@ using UnityEngine;
 public class BlockFloor : MonoBehaviour {
 	public static BlockFloor I;
 	public GameObject floorBlockPrefab;
+	public GameObject killBlockPrefab;
 	public int size = 100;
 	Vector2 nextDrop;
 	int dropDirectionIndex = 0;
@@ -38,6 +39,18 @@ public class BlockFloor : MonoBehaviour {
 
 		for (int x = 0; x < size; x++) {
 			for (int y = 0; y < size; y++) {
+				if (x == 0) {
+					SpawnKillBlock(new Vector3(-1, 0, y));
+				}
+				if (x == size - 1) {
+					SpawnKillBlock(new Vector3(size, 0, y));
+				}
+				if (y == 0) {
+					SpawnKillBlock(new Vector3(x, 0, -1));
+				}
+				if (y == size - 1) {
+					SpawnKillBlock(new Vector3(x, 0, size));
+				}
 				var z = Instantiate(floorBlockPrefab, new Vector3(x, -1, y), Quaternion.identity, transform);
 				z.name = "(" + x.ToString() + "," + y.ToString() + ")";
 				if (x % 2 == 0 && y % 2 == 1) {
@@ -83,11 +96,16 @@ public class BlockFloor : MonoBehaviour {
 	}
 
 	void DropBlock(GameObject block) {
+		SpawnKillBlock(block.transform.position);
 		var r = block.AddComponent<Rigidbody>();
 		r.AddTorque(GetRandomTorque());
 		r.AddForce((r.transform.position - Vector3.zero).normalized * blockPushAwayForce, ForceMode.VelocityChange);
 		r.useGravity = false;
 		block.name += " Dropping";
+	}
+
+	void SpawnKillBlock(Vector3 position) {
+		Instantiate(killBlockPrefab, new Vector3(position.x, 0, position.z), Quaternion.identity, transform);
 	}
 
 	Vector3 GetRandomTorque() {

@@ -34,3 +34,6 @@ PHASE ARBOK
 - Apple syncing
     - if snake eats an apple or something right when a new player joins, that apple might still show as active on the new players client
 
+## Network Bugs
+- one snake is longer than its remote version
+- positions are off by one sometimes
