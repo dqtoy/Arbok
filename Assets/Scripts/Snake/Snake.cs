@@ -32,8 +32,8 @@ public class Snake : NetworkBehaviour {
     }
 
     void Start() {
-        GlobalTick.I.OnDoTick += DoTick;
-        GlobalTick.I.OnRollbackTick += RollbackTick;
+        GlobalTick.OnDoTick += DoTick;
+        GlobalTick.OnRollbackTick += RollbackTick;
     }
 
     void Update() {
@@ -109,7 +109,7 @@ public class Snake : NetworkBehaviour {
 
     void OnDestroy() {
         all.Remove(this);
-        GlobalTick.I.OnDoTick -= DoTick;
-        GlobalTick.I.OnRollbackTick -= RollbackTick;
+        GlobalTick.OnDoTick -= DoTick;
+        GlobalTick.OnRollbackTick -= RollbackTick;
     }
 }

@@ -24,8 +24,15 @@ public class BlockFloor : MonoBehaviour {
 
 	// Use this for initialization
 	void Start() {
+		Debug.Log("BlockFloor Start");
 		SpawnFloor();
-
+		GlobalTick.OnInitialized += (tick) => {
+			Debug.Log("BlockFloor GlobalTick.I.OnInitialized");
+			StartDropping();
+			for (int i = 0; i < tick; i++) {
+				DoTick();
+			}
+		};
 	}
 
 	// Update is called once per frame
@@ -64,18 +71,17 @@ public class BlockFloor : MonoBehaviour {
 		transform.position = new Vector3(-size / 2 * startScale.x, 0, -size / 2 * startScale.z);
 
 		transform.localScale = startScale;
-
 	}
 
 	public void StartDropping() {
-		GlobalTick.I.OnDoTick += DropStuff;
+		GlobalTick.OnDoTick += DoTick;
 	}
 
 	public void StopDropping() {
-		GlobalTick.I.OnDoTick -= DropStuff;
+		GlobalTick.OnDoTick -= DoTick;
 	}
 
-	void DropStuff() {
+	void DoTick() {
 		var x = GetNextBlockToDrop();
 		if (x == null) {
 			nextDrop -= dropDirections[dropDirectionIndex];

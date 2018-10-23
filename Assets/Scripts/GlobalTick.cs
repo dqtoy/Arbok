@@ -11,8 +11,9 @@ public class GlobalTick : NetworkBehaviour {
 
 	public float ticksPerSecond = 1;
 
-	public event Action OnDoTick;
-	public event Action OnRollbackTick;
+	public static event Action OnDoTick;
+	public static event Action OnRollbackTick;
+	public static event Action<int> OnInitialized;
 
 	float elapsedTime = 0;
 
@@ -144,6 +145,6 @@ public class GlobalTick : NetworkBehaviour {
 		elapsedTime += NetworkManager.singleton.client.GetRTT() / 2;
 		// elapsedTime = serverCurrentTickElapsedTime + (NetworkManager.singleton.client.GetRTT() / 2f / 1000f);
 		// elapsedTime = 0;
-		BlockFloor.I.StartDropping();
+		OnInitialized?.Invoke(currentTick);
 	}
 }
