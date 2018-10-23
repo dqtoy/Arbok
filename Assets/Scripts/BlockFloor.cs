@@ -17,10 +17,15 @@ public class BlockFloor : MonoBehaviour {
 	public Material normalMaterial;
 	public Material darkMaterial;
 
-	void Awake() {
+    List<GameObject> killBlocks = new List<GameObject>();
+    List<Vector2> nextDrops = new List<Vector2>();
+    List<int> dropDirectionIndexes = new List<int>();
+    List<GameObject> dropBlocks = new List<GameObject>();
+
+    void Awake() {
 		I = this;
 		startScale = transform.localScale;
-	}
+    }
 
 	// Use this for initialization
 	void Start() {
@@ -28,7 +33,13 @@ public class BlockFloor : MonoBehaviour {
 		SpawnFloor();
 		GlobalTick.OnInitialized += (tick) => {
 			Debug.Log("BlockFloor GlobalTick.I.OnInitialized");
-			StartDropping();
+
+            killBlocks.Clear();
+            nextDrops.Clear();
+            dropDirectionIndexes.Clear();
+            dropBlocks.Clear();
+
+            StartDropping();
 			for (int i = 0; i < tick; i++) {
 				DoTick();
 			}
@@ -75,11 +86,13 @@ public class BlockFloor : MonoBehaviour {
 
 	public void StartDropping() {
 		GlobalTick.OnDoTick += DoTick;
-	}
+        GlobalTick.OnRollbackTick += RollbackTick;
+    }
 
 	public void StopDropping() {
 		GlobalTick.OnDoTick -= DoTick;
-	}
+        GlobalTick.OnRollbackTick -= RollbackTick;
+    }
 
 	void DoTick() {
 		var x = GetNextBlockToDrop();
@@ -93,26 +106,56 @@ public class BlockFloor : MonoBehaviour {
 			StopDropping();
 			return;
 		}
-		DropBlock(x);
+
 		nextDrop += dropDirections[dropDirectionIndex];
-	}
+        DropBlock(x);
+    }
+
+    void RollbackTick() {
+        nextDrop -= dropDirections[dropDirectionIndex];
+
+        GameObject killBlock = killBlocks[killBlocks.Count - 1];
+        killBlocks.RemoveAt(killBlocks.Count - 1);
+
+        nextDrops.RemoveAt(nextDrops.Count - 1);
+        nextDrop = nextDrops[nextDrops.Count - 1];
+
+        dropDirectionIndexes.RemoveAt(dropDirectionIndexes.Count - 1);
+        dropDirectionIndex = dropDirectionIndexes[dropDirectionIndexes.Count - 1];
+
+        GameObject dropBlock = dropBlocks[dropBlocks.Count - 1];
+        dropBlock.name = dropBlock.name.Substring(0, dropBlock.name.Length - 9);
+        Destroy(dropBlock.GetComponent<Rigidbody>());
+        dropBlock.transform.position = new Vector3(killBlock.transform.position.x, -1, killBlock.transform.position.z);
+        dropBlock.transform.rotation = Quaternion.identity;
+        dropBlocks.RemoveAt(dropBlocks.Count - 1);
+
+        Destroy(killBlock);
+    }
 
 	GameObject GetNextBlockToDrop() {
 		return GameObject.Find("(" + nextDrop.x.ToString() + "," + nextDrop.y.ToString() + ")");
 	}
 
 	void DropBlock(GameObject block) {
-		SpawnKillBlock(block.transform.position);
+        GameObject killBlock = SpawnKillBlock(block.transform.position);
 		var r = block.AddComponent<Rigidbody>();
-		r.AddTorque(GetRandomTorque());
-		r.AddForce((r.transform.position - Vector3.zero).normalized * blockPushAwayForce, ForceMode.VelocityChange);
-		r.useGravity = false;
-		block.name += " Dropping";
-	}
+        r.AddTorque(GetRandomTorque());
+        r.AddForce((r.transform.position - Vector3.zero).normalized * blockPushAwayForce, ForceMode.VelocityChange);
+        r.useGravity = false;
+        block.name += " Dropping";
 
-	void SpawnKillBlock(Vector3 position) {
-		Instantiate(killBlockPrefab, new Vector3(position.x, 0, position.z), Quaternion.identity, transform);
-	}
+        killBlocks.Add(killBlock);
+        nextDrops.Add(nextDrop);
+        dropDirectionIndexes.Add(dropDirectionIndex);
+        dropBlocks.Add(block);
+
+    }
+
+    GameObject SpawnKillBlock(Vector3 position) {
+		GameObject killBlock = Instantiate(killBlockPrefab, new Vector3(position.x, 0, position.z), Quaternion.identity, transform);
+        return killBlock;
+    }
 
 	Vector3 GetRandomTorque() {
 		return new Vector3(

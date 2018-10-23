@@ -83,7 +83,7 @@ public class Snake : NetworkBehaviour {
     }
 
     void RollbackTick() {
-        Toolbox.Log("RollbackTick");
+        //Toolbox.Log("RollbackTick");
         snakeEvents.ReverseEventsAtTickIfAny(GlobalTick.I.currentTick, this);
         AfterRollbackTick?.Invoke();
     }
