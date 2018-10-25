@@ -51,7 +51,8 @@ public class GlobalTick : NetworkBehaviour {
 		if (serverTick > currentTick) {
 			RollForwardToTick(serverTick);
 		} else if (serverTick < currentTick) {
-			elapsedTime -= (currentTick - serverTick) / ticksPerSecond;
+			RollbackToTick(serverTick);
+			// elapsedTime -= (currentTick - serverTick) / ticksPerSecond;
 		}
 		// this.elapsedTime = serverCurrentTickElapsedTime + (NetworkManager.singleton.client.GetRTT() / 2f / 1000f);
 		// this.elapsedTime = 0;
