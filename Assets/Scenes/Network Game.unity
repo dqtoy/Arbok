@@ -5254,7 +5254,7 @@ Camera:
   far clip plane: 1000
   field of view: 144
   orthographic: 1
-  orthographic size: 101.23
+  orthographic size: 10.13
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -8709,6 +8709,11 @@ Prefab:
     - target: {fileID: 1413406949541522, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}
       propertyPath: m_Name
       value: Apple (2)
+      objectReference: {fileID: 0}
+    - target: {fileID: 111094288702946670, guid: 3d3c9a27c87b04822bccd5080e35c146,
+        type: 2}
+      propertyPath: m_AnimatePhysics
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 3d3c9a27c87b04822bccd5080e35c146, type: 2}

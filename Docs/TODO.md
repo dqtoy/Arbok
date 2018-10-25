@@ -30,6 +30,8 @@ PHASE ARBOK
 - [ ] sync head direction on join
 - [ ] interpolation of snake movement
 - [ ] playback game after game ends
+- [ ] make snake death a reversible event
+
 ## Possible Issues
 - Apple syncing
     - if snake eats an apple or something right when a new player joins, that apple might still show as active on the new players client
@@ -37,3 +39,4 @@ PHASE ARBOK
 ## Network Bugs
 - one snake is longer than its remote version
 - positions are off by one sometimes
+

@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 65844177041306178}
   - component: {fileID: 23828241490651372}
   - component: {fileID: 114328335062277104}
+  - component: {fileID: 111094288702946670}
   m_Layer: 0
   m_Name: Apple
   m_TagString: Untagged
@@ -58,7 +59,7 @@ MeshRenderer:
   m_ReflectionProbeUsage: 1
   m_RenderingLayerMask: 4294967295
   m_Materials:
-  - {fileID: 2100000, guid: 3fec0a2e4175640c1acd2babb7cef83b, type: 2}
+  - {fileID: 2100000, guid: a32b295a705df1548b7c6ca4a9c2b2e1, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -97,6 +98,21 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.5, y: 1, z: 0.5}
   m_Center: {x: 0, y: 0, z: 0}
+--- !u!111 &111094288702946670
+Animation:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1413406949541522}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Animation: {fileID: 7400000, guid: 7af4f6f8614650540ac26c6213a5576a, type: 2}
+  m_Animations:
+  - {fileID: 7400000, guid: 7af4f6f8614650540ac26c6213a5576a, type: 2}
+  m_WrapMode: 0
+  m_PlayAutomatically: 1
+  m_AnimatePhysics: 0
+  m_CullingType: 0
 --- !u!114 &114328335062277104
 MonoBehaviour:
   m_ObjectHideFlags: 1
