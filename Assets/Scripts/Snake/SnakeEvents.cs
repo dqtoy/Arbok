@@ -94,10 +94,6 @@ class SnakeMoveEvent : SnakeEvent {
     public void Execute(Snake snake) {
         Vector3 newPosition = snake.head.transform.position + snake.currentDirection.GetMoveVector();
 
-        if (AboutToCollideWithSelf(snake, newPosition)) {
-            snake.Die();
-        }
-
         if (snake.links.Count > 0) {
             var oldTail = snake.links.Last();
             snake.links.RemoveAt(snake.links.Count - 1);
@@ -185,7 +181,7 @@ public class SnakeEatAppleEvent : SnakeEvent {
     public void Execute(Snake snake) {
         apple.gameObject.SetActive(false);
         var newTail = GameObject.Instantiate(snake.snakeTailPrefab, snake.transform);
-        snake.links.Add(newTail);
+        snake.links.Add(newTail.GetComponent<SnakeTail>());
     }
 
     public void Reverse(Snake snake) {

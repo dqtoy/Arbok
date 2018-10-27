@@ -19,7 +19,7 @@ public class Snake : NetworkBehaviour {
     public Direction currentDirection = Up.I;
 
     public SnakeEvents snakeEvents { get; private set; }
-    public List<GameObject> links { get; private set; }
+    public List<SnakeTail> links { get; private set; }
 
     public event Action AfterTick;
     public event Action AfterRollbackTick;
@@ -29,7 +29,7 @@ public class Snake : NetworkBehaviour {
 
     void Awake() {
         snakeEvents = new SnakeEvents();
-        links = new List<GameObject>();
+        links = new List<SnakeTail>();
         all.Add(this);
     }
 
@@ -77,20 +77,29 @@ public class Snake : NetworkBehaviour {
 
     void DoDeathCheck() {
         if (DidWeCollideWithSelf() || DidWeCollideWithWall() || DidWeCollideWithOtherSnake()) {
+            Toolbox.Log("DIE");
             snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick, new SnakeDieEvent());
         }
     }
 
     bool DidWeCollideWithSelf() {
-        return links.Any(x => x.transform.position == head.transform.position);
+        return links.Any(doesPositionMatchHeadPosition);
     }
 
     bool DidWeCollideWithWall() {
-        return Wall.all.Any(x => x.transform.position == head.transform.position);
+        return Wall.all.Any(doesPositionMatchHeadPosition);
     }
 
     bool DidWeCollideWithOtherSnake() {
-        return false;
+        return Snake.all.Where(SnakeIsAlive).Any(x => x.links.Any(doesPositionMatchHeadPosition));
+    }
+
+    bool SnakeIsAlive(Snake s) {
+        return s.isDead == false;
+    }
+
+    bool doesPositionMatchHeadPosition(MonoBehaviour x) {
+        return x.transform.position == head.transform.position;
     }
 
     void DoAppleEatCheck() {
@@ -112,20 +121,7 @@ public class Snake : NetworkBehaviour {
     public void SetSnakeData(SnakeState state) {
         this.head.transform.position = state.headPosition;
         this.currentDirection = state.direction;
-        this.links = state.linkPositions.Select(x => Instantiate(snakeTailPrefab, x, Quaternion.identity, this.transform)).ToList();
-    }
-
-    void OnTriggerEnter(Collider other) {
-        if (other.gameObject.HasComponent<Wall>() || (other.gameObject.HasComponent<SnakeTail>())) {
-            Die();
-        }
-    }
-
-    public void Die() {
-        Toolbox.Log("DIE");
-        Destroy(gameObject);
-        // Hide visible parts
-        // Stop moving/ticking
+        this.links = state.linkPositions.Select(x => Instantiate(snakeTailPrefab, x, Quaternion.identity, this.transform).GetComponent<SnakeTail>()).ToList();
     }
 
     void OnDestroy() {

@@ -605,7 +605,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a56f75296f640074fb7060e5aa259b0e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ticksPerSecond: 12
+  ticksPerSecond: 10
   manualTickDebugMode: 0
 --- !u!4 &106650164
 Transform:
@@ -1646,6 +1646,7 @@ GameObject:
   - component: {fileID: 328579473}
   - component: {fileID: 328579475}
   - component: {fileID: 328579474}
+  - component: {fileID: 328579476}
   m_Layer: 5
   m_Name: GlobalTickNetID
   m_TagString: Untagged
@@ -1711,6 +1712,20 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 328579472}
   m_CullTransparentMesh: 0
+--- !u!114 &328579476
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 328579472}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -900027084, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
+  m_EffectDistance: {x: 1, y: -1}
+  m_UseGraphicAlpha: 1
 --- !u!4 &336236280 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146,
@@ -7820,6 +7835,7 @@ GameObject:
   - component: {fileID: 1787118906}
   - component: {fileID: 1787118908}
   - component: {fileID: 1787118907}
+  - component: {fileID: 1787118909}
   m_Layer: 5
   m_Name: Text
   m_TagString: Untagged
@@ -7885,6 +7901,20 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 1787118905}
   m_CullTransparentMesh: 0
+--- !u!114 &1787118909
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 1787118905}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -900027084, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
+  m_EffectDistance: {x: 1, y: -1}
+  m_UseGraphicAlpha: 1
 --- !u!1001 &1796121243
 Prefab:
   m_ObjectHideFlags: 0
@@ -8588,8 +8618,6 @@ MonoBehaviour:
   redMat: {fileID: 2100000, guid: 068344def01bbcc41af161a658d7a308, type: 2}
   blueMat: {fileID: 2100000, guid: ed271711e51946f469c79114c11c7de2, type: 2}
   plane: {fileID: 57098888}
-  output: 
-  stack: 
 --- !u!114 &1907008715
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9079,7 +9107,7 @@ MonoBehaviour:
   m_UseWebSockets: 0
   m_UseSimulator: 0
   m_SimulatedLatency: 90
-  m_PacketLossPercentage: 1.5
+  m_PacketLossPercentage: 0
   m_MaxBufferedPackets: 16
   m_AllowFragmentation: 1
   m_MatchHost: mm.unet.unity3d.com
@@ -9315,6 +9343,7 @@ GameObject:
   - component: {fileID: 2072414309}
   - component: {fileID: 2072414311}
   - component: {fileID: 2072414310}
+  - component: {fileID: 2072414312}
   m_Layer: 5
   m_Name: GlobalTickTextUI
   m_TagString: Untagged
@@ -9380,6 +9409,20 @@ CanvasRenderer:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 2072414308}
   m_CullTransparentMesh: 0
+--- !u!114 &2072414312
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2072414308}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -900027084, guid: f70555f144d8491a825f0804e09c671c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EffectColor: {r: 0, g: 0, b: 0, a: 0.5}
+  m_EffectDistance: {x: 1, y: -1}
+  m_UseGraphicAlpha: 1
 --- !u!1001 &2081466843
 Prefab:
   m_ObjectHideFlags: 0

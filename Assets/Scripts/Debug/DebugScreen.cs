@@ -21,16 +21,9 @@ public class DebugScreen : MonoBehaviour {
         text = transform.Find("Panel/Text").GetComponent<Text>();
     }
 
-    public void Log(string log) {
-        // text.text = log + "\n" + text.text;
-    }
-
     public void ToggleVisibility() {
         text.gameObject.SetActive(!text.gameObject.activeSelf);
     }
-
-    public string output = "";
-    public string stack = "";
 
     void OnEnable() {
         Application.logMessageReceived += HandleLog;
@@ -41,16 +34,11 @@ public class DebugScreen : MonoBehaviour {
     }
 
     void HandleLog(string logString, string stackTrace, LogType type) {
-
-        if (text.text.Length > 2000) {
-            text.text = "";
-        }
         if (type == LogType.Error || type == LogType.Exception) {
-            text.text = stackTrace + "\n" + text.text;
+            text.text = (stackTrace + "\n" + text.text).Truncate(1000);
         }
-        text.text = logString + "\n" + text.text;
-        output = logString;
-        stack = stackTrace;
+
+        text.text = (logString + "\n" + text.text).Truncate(1000);
     }
 
     public void SetPlaneRed() {
