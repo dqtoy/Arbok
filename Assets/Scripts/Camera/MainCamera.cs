@@ -10,29 +10,36 @@ public class MainCamera : MonoBehaviour {
 
 	public float moveSpeed = 1;
 	float startSize;
+	float startYPosition;
 
 	// Use this for initialization
 	void Awake() {
 		I = this;
-		target = this.transform;
 		camera = GetComponent<Camera>();
 		startSize = camera.orthographicSize;
+		startYPosition = transform.position.y;
 	}
 
 	// Update is called once per frame
 	void Update() {
-		if (target == null) target = this.transform;
+		if (target == null) return;
 
-		var vectorToTarget = target.position - transform.position;
+		var targetYPosition = startYPosition + target.position.y;
 
-		vectorToTarget.y = 0;
+		var targetActual = new Vector3(target.position.x, targetYPosition, target.position.z);
+
+		var vectorToTarget = targetActual - transform.position;
 
 		transform.position += vectorToTarget * Time.deltaTime * moveSpeed;
 
-		var targetSize = startSize + (target.localScale.x - 1) / 4;
+		if (camera.orthographic) {
+			var targetSize = startSize + (target.localScale.x - 1) / 4;
 
-		var amountToTargetSize = targetSize - camera.orthographicSize;
+			var amountToTargetSize = targetSize - camera.orthographicSize;
 
-		camera.orthographicSize += amountToTargetSize / 2 * Time.deltaTime;
+			camera.orthographicSize += amountToTargetSize / 2 * Time.deltaTime;
+		} else {
+
+		}
 	}
 }

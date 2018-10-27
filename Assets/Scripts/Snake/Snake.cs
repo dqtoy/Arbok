@@ -39,8 +39,8 @@ public class Snake : NetworkBehaviour {
     }
 
     void Update() {
-        // cameraTarget.position += Vector3.up * (links.Count + 1);
-        cameraTarget.localScale = new Vector3(links.Count * cameraScalingMod, 1, 1);
+        cameraTarget.position = new Vector3(cameraTarget.position.x, links.Count + 1, cameraTarget.position.z);
+        // cameraTarget.localScale = new Vector3(links.Count * cameraScalingMod, 1, 1);
     }
 
     public void ChangeDirectionAtNextTick(Direction newDirection) {
