@@ -58,9 +58,10 @@ public class SnakeEvents {
 
 public class SnakeCompoundEvent {
     static List<Type> priorityMap = new List<Type> {
+        typeof(SnakeDieEvent),
         typeof(SnakeEatAppleEvent),
         typeof(SnakeChangeDirectionEvent),
-        typeof(SnakeMoveEvent)
+        typeof(SnakeMoveEvent),
     };
 
     public SnakeEvent[] events = new SnakeEvent[priorityMap.Count()];
@@ -175,14 +176,14 @@ public class SnakeChangeDirectionEvent : SnakeEvent {
 }
 
 public class SnakeEatAppleEvent : SnakeEvent {
-    GameObject apple;
+    Apple apple;
 
-    public SnakeEatAppleEvent(GameObject apple) {
+    public SnakeEatAppleEvent(Apple apple) {
         this.apple = apple;
     }
 
     public void Execute(Snake snake) {
-        apple.SetActive(false);
+        apple.gameObject.SetActive(false);
         var newTail = GameObject.Instantiate(snake.snakeTailPrefab, snake.transform);
         snake.links.Add(newTail);
     }
@@ -191,10 +192,28 @@ public class SnakeEatAppleEvent : SnakeEvent {
         var firstTailLink = snake.links.Last();
         snake.links.Remove(firstTailLink);
         GameObject.Destroy(firstTailLink);
-        apple.SetActive(true);
+        apple.gameObject.SetActive(true);
     }
 
     public override string ToString() {
         return "E";
+    }
+}
+
+public class SnakeDieEvent : SnakeEvent {
+    public void Execute(Snake snake) {
+        snake.isDead = true;
+        snake.headVisual.SetActive(false);
+        snake.links.ForEach(x => x.GetComponent<MeshRenderer>().enabled = false);
+    }
+
+    public void Reverse(Snake snake) {
+        snake.links.ForEach(x => x.GetComponent<MeshRenderer>().enabled = true);
+        snake.headVisual.SetActive(true);
+        snake.isDead = false;
+    }
+
+    public override string ToString() {
+        return "D";
     }
 }

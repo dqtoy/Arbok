@@ -21,7 +21,6 @@ GameObject:
   - component: {fileID: 4102831899962586}
   - component: {fileID: 33698901516183630}
   - component: {fileID: 23124096622950902}
-  - component: {fileID: 65012104959799644}
   - component: {fileID: 114329902365816058}
   m_Layer: 0
   m_Name: KillBlock
@@ -85,18 +84,6 @@ MeshFilter:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1443596318822380}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!65 &65012104959799644
-BoxCollider:
-  m_ObjectHideFlags: 1
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 1443596318822380}
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_Enabled: 1
-  serializedVersion: 2
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &114329902365816058
 MonoBehaviour:
   m_ObjectHideFlags: 1

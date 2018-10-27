@@ -4,18 +4,21 @@ using UnityEngine;
 
 public class BlockFloor : MonoBehaviour {
 	public static BlockFloor I;
+
 	public GameObject floorBlockPrefab;
 	public GameObject killBlockPrefab;
 	public int size = 100;
-	Vector2 nextDrop;
-	int dropDirectionIndex = 0;
-	Vector2[] dropDirections = new Vector2[] { Vector2.up, Vector2.right, Vector2.down, Vector2.left };
 	public float minRandomTorque = 1;
 	public float maxRandomTorque = 10;
 	public float blockPushAwayForce = 1;
-	Vector3 startScale;
 	public Material normalMaterial;
 	public Material darkMaterial;
+
+	readonly Vector2[] dropDirections = new Vector2[] { Vector2.up, Vector2.right, Vector2.down, Vector2.left };
+
+	Vector3 startScale = Vector3.one;
+	Vector2 nextDrop;
+	int dropDirectionIndex = 0;
 
 	List<GameObject> killBlocks = new List<GameObject>();
 	List<Vector2> nextDrops = new List<Vector2>();
@@ -24,6 +27,7 @@ public class BlockFloor : MonoBehaviour {
 
 	void Awake() {
 		I = this;
+		transform.localScale = Vector3.one;
 		startScale = transform.localScale;
 	}
 
@@ -71,8 +75,6 @@ public class BlockFloor : MonoBehaviour {
 				}
 				var z = Instantiate(floorBlockPrefab, new Vector3(x, -1, y), Quaternion.identity, transform);
 				z.name = "(" + x.ToString() + "," + y.ToString() + ")";
-				var r = z.AddComponent<Rigidbody>();
-				r.useGravity = false;
 				if (x % 2 == 0 && y % 2 == 1) {
 					z.GetComponent<MeshRenderer>().material = darkMaterial;
 				} else {
@@ -128,9 +130,6 @@ public class BlockFloor : MonoBehaviour {
 		dropBlock.name = dropBlock.name.Substring(0, dropBlock.name.Length - 9);
 		dropBlock.transform.position = new Vector3(killBlock.transform.position.x, -1, killBlock.transform.position.z);
 		dropBlock.transform.rotation = Quaternion.identity;
-		var r = dropBlock.GetComponent<Rigidbody>();
-		r.velocity = Vector3.zero;
-		r.angularVelocity = Vector3.zero;
 		dropBlocks.RemoveAt(dropBlocks.Count - 1);
 
 		Destroy(killBlock);
@@ -142,16 +141,12 @@ public class BlockFloor : MonoBehaviour {
 
 	void DropBlock(GameObject block) {
 		GameObject killBlock = SpawnKillBlock(block.transform.position);
-		var r = block.GetComponent<Rigidbody>();
-		r.AddTorque(GetRandomTorque());
-		r.AddForce((r.transform.position - Vector3.zero).normalized * blockPushAwayForce, ForceMode.VelocityChange);
 		block.name += " Dropping";
 
 		killBlocks.Add(killBlock);
 		nextDrops.Add(nextDrop);
 		dropDirectionIndexes.Add(dropDirectionIndex);
 		dropBlocks.Add(block);
-
 	}
 
 	GameObject SpawnKillBlock(Vector3 position) {

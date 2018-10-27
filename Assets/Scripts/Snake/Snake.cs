@@ -14,6 +14,7 @@ public class Snake : NetworkBehaviour {
     public GameObject snakeTailPrefab;
     public SnakeHead head;
     public Transform cameraTarget;
+    public GameObject headVisual;
 
     public Direction currentDirection = Up.I;
 
@@ -24,6 +25,7 @@ public class Snake : NetworkBehaviour {
     public event Action AfterRollbackTick;
 
     public float cameraScalingMod = 1;
+    public bool isDead;
 
     void Awake() {
         snakeEvents = new SnakeEvents();
@@ -42,6 +44,7 @@ public class Snake : NetworkBehaviour {
     }
 
     public void ChangeDirectionAtNextTick(Direction newDirection) {
+        snakeEvents.PurgeTicksAfterTick(GlobalTick.I.currentTick);
         snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick + 1, new SnakeChangeDirectionEvent(newDirection));
     }
 
@@ -61,24 +64,42 @@ public class Snake : NetworkBehaviour {
     }
 
     void DoTick() {
-        DoAppleEatCheck();
-
-        snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick, new SnakeMoveEvent());
+        if (!isDead) {
+            DoDeathCheck();
+            DoAppleEatCheck();
+            snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick, new SnakeMoveEvent());
+        }
 
         snakeEvents.ExecuteEventsAtTickIfAny(GlobalTick.I.currentTick, this);
 
         AfterTick?.Invoke();
     }
 
-    void DoAppleEatCheck() {
-        AppleManager.all.ForEach(x => {
-            if (x.transform.position == head.transform.position) {
-                EatApple(x.gameObject);
-            }
-        });
+    void DoDeathCheck() {
+        if (DidWeCollideWithSelf() || DidWeCollideWithWall() || DidWeCollideWithOtherSnake()) {
+            snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick, new SnakeDieEvent());
+        }
     }
 
-    void EatApple(GameObject apple) {
+    bool DidWeCollideWithSelf() {
+        return links.Any(x => x.transform.position == head.transform.position);
+    }
+
+    bool DidWeCollideWithWall() {
+        return Wall.all.Any(x => x.transform.position == head.transform.position);
+    }
+
+    bool DidWeCollideWithOtherSnake() {
+        return false;
+    }
+
+    void DoAppleEatCheck() {
+        var apple = AppleManager.all.FirstOrDefault(x => (x.transform.position == head.transform.position));
+
+        if (apple) EatApple(apple);
+    }
+
+    void EatApple(Apple apple) {
         snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick, new SnakeEatAppleEvent(apple));
     }
 
