@@ -30,7 +30,7 @@ PHASE ARBOK
 - [ ] sync head direction on join
 - [ ] interpolation of snake movement
 - [ ] playback game after game ends
-- [ ] make snake death a reversible event
+- [x] make snake death a reversible event
 
 ## Possible Issues
 - Apple syncing
@@ -39,4 +39,10 @@ PHASE ARBOK
 ## Network Bugs
 - one snake is longer than its remote version
 - positions are off by one sometimes
+
+
+## Server Start
+- [ ] wait for players
+- [ ] start countdown once enough players
+- [ ] start game at end of countdown
 
