@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 
@@ -10,6 +11,8 @@ public class SnakeServer : NetworkBehaviour {
 
 	[SyncVar]
 	int playerCount = 0;
+	[SyncVar]
+	int alivePayerCount = 0;
 
 	ServerGameState state;
 
@@ -30,7 +33,8 @@ public class SnakeServer : NetworkBehaviour {
 	}
 
 	void UpdateServer() {
-		SnakeServer.I.playerCount = NetworkServer.connections.Count;
+		playerCount = NetworkServer.connections.Count;
+		alivePayerCount = Snake.GetAlivePlayerCount();
 
 		var nextState = state.GetNextState();
 
@@ -44,6 +48,7 @@ public class SnakeServer : NetworkBehaviour {
 
 	void UpdateClient() {
 		GameUI.I.SetMainGameText(playerCount + " Player" + (playerCount == 1 ? "" : "s"));
+		GameUI.I.SetAlivePlayersText(alivePayerCount);
 	}
 
 	public override void OnStartServer() {

@@ -27,6 +27,10 @@ public class Snake : NetworkBehaviour {
     public float cameraScalingMod = 1;
     public bool isDead;
 
+    public static int GetAlivePlayerCount() {
+        return Snake.all.Count(x => x.isDead == false);
+    }
+
     void Awake() {
         snakeEvents = new SnakeEvents();
         links = new List<SnakeTail>();
