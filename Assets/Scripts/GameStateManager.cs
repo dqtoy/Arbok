@@ -4,8 +4,8 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class SnakeServer : NetworkBehaviour {
-	public static SnakeServer I;
+public class GameStateManager : NetworkBehaviour {
+	public static GameStateManager I;
 
 	public int minimumPlayerCount = 2;
 
@@ -14,7 +14,7 @@ public class SnakeServer : NetworkBehaviour {
 	[SyncVar]
 	int alivePayerCount = 0;
 
-	ServerGameState state;
+	GameState state;
 
 	void Awake() {
 		I = this;
@@ -24,7 +24,7 @@ public class SnakeServer : NetworkBehaviour {
 		if (!isServer) return;
 
 		Toolbox.Log("SnakeServer Start");
-		state = GetComponent<ServerGameWaiting>();
+		state = GetComponent<GameWaiting>();
 	}
 
 	void Update() {

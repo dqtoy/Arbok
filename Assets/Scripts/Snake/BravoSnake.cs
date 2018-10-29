@@ -153,8 +153,6 @@ public class BravoSnake : NetworkBehaviour {
         NewTail();
     }
 
-    readonly Vector3 zeroVector = Vector3.zero;
-
     GameObject NewTail() {
         return NewTail(Vector3.zero);
     }

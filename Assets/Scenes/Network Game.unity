@@ -3175,56 +3175,6 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 4195827091741326, guid: 3d3c9a27c87b04822bccd5080e35c146,
     type: 2}
   m_PrefabInternal: {fileID: 728885456}
---- !u!1 &729628733
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 729628735}
-  - component: {fileID: 729628734}
-  m_Layer: 0
-  m_Name: BlockFloor
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &729628734
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 729628733}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6bbdc4026711e5046b7b73a6db5d83cc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  floorBlockPrefab: {fileID: 1222947905539912, guid: f0f086a3b5b0d0045925e58f54efec37,
-    type: 2}
-  killBlockPrefab: {fileID: 1443596318822380, guid: d2dd8e51972657649b32e9f712c4bd4b,
-    type: 2}
-  size: 80
-  minRandomTorque: -10
-  maxRandomTorque: 10
-  blockPushAwayForce: 1
-  normalMaterial: {fileID: 2100000, guid: f72d5cd90d7622849a15012a3256350a, type: 2}
-  darkMaterial: {fileID: 2100000, guid: 155b75744a3f873438fea485199d4add, type: 2}
---- !u!4 &729628735
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 729628733}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 12
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &741726210
 Prefab:
   m_ObjectHideFlags: 0
@@ -9332,6 +9282,8 @@ MonoBehaviour:
   matchSize: 4
   isNetworkActive: 0
   matchMaker: {fileID: 0}
+  blockFloorPrefab: {fileID: 1512929949516436, guid: eb80e0a30fc3c114e85672c125e17785,
+    type: 2}
 --- !u!4 &1986309192
 Transform:
   m_ObjectHideFlags: 0
@@ -9886,7 +9838,7 @@ RectTransform:
   - {fileID: 1309731310}
   - {fileID: 1811521070}
   m_Father: {fileID: 0}
-  m_RootOrder: 13
+  m_RootOrder: 12
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}

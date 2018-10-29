@@ -168,4 +168,8 @@ public class BlockFloor : MonoBehaviour {
 			dropDirectionIndex = 0;
 		}
 	}
+
+	void OnDestroy() {
+		StopDropping();
+	}
 }

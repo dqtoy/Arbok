@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ServerGameOver : ServerGameState {
-	public override ServerGameState GetNextState() {
+public class GameOver : GameState {
+	public override GameState GetNextState() {
 		throw new System.NotImplementedException();
 	}
 

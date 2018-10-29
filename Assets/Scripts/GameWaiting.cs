@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Networking;
 
-public class ServerGameWaiting : ServerGameState {
+public class GameWaiting : GameState {
 
 	// Use this for initialization
 	void Start() {
@@ -13,9 +13,9 @@ public class ServerGameWaiting : ServerGameState {
 	// Update is called once per frame
 	void Update() { }
 
-	public override ServerGameState GetNextState() {
-		if (SnakeServer.I.HaveEnoughPlayersToStartGame()) {
-			return GetComponent<ServerGameRunning>();
+	public override GameState GetNextState() {
+		if (GameStateManager.I.HaveEnoughPlayersToStartGame()) {
+			return GetComponent<GameRunning>();
 		} else {
 			return null;
 		}
