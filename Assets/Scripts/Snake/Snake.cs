@@ -57,6 +57,7 @@ public class Snake : NetworkBehaviour {
 
         if (missedTick) {
             var realCurrentTick = GlobalTick.I.currentTick;
+            GlobalTick.I.RollbackToTick(tick - 1);
             snakeEvents.PurgeTicksAfterTick(GlobalTick.I.currentTick);
             snakeEvents.AddOrReplaceAtTick(tick, snakeEvent);
             GlobalTick.I.RollForwardToTick(realCurrentTick);
