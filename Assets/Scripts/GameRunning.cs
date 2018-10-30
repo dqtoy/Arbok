@@ -4,14 +4,10 @@ using UnityEngine;
 
 public class GameRunning : GameState {
 	public override GameState GetNextState() {
-		return null;
-	}
-
-	void Start() {
-
-	}
-
-	void Update() {
-
+		if (GameStateManager.I.GetAlivePlayerCount() <= 1) {
+			return GetComponent<GameOver>();
+		} else {
+			return null;
+		}
 	}
 }

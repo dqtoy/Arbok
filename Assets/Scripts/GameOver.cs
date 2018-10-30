@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class GameOver : GameState {
 	public override GameState GetNextState() {
-		throw new System.NotImplementedException();
+		return null;
 	}
 
 	// Use this for initialization

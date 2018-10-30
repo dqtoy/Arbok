@@ -6,4 +6,5 @@ public class SnakeState {
     public Direction direction;
     public Vector3[] linkPositions;
     public float elapsedTime;
+    public bool isDead;
 }

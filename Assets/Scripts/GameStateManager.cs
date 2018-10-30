@@ -13,6 +13,8 @@ public class GameStateManager : NetworkBehaviour {
 	int playerCount = 0;
 	[SyncVar]
 	int alivePayerCount = 0;
+	[SyncVar]
+	string stateString;
 
 	GameState state;
 
@@ -25,6 +27,7 @@ public class GameStateManager : NetworkBehaviour {
 
 		Toolbox.Log("SnakeServer Start");
 		state = GetComponent<GameWaiting>();
+		stateString = state.GetType().Name;
 	}
 
 	void Update() {
@@ -42,12 +45,13 @@ public class GameStateManager : NetworkBehaviour {
 			Toolbox.Log("SnakeServer switching state: " + nextState.GetType().Name);
 			state.Exit();
 			state = nextState;
+			stateString = state.GetType().Name;
 			state.Enter();
 		}
 	}
 
 	void UpdateClient() {
-		GameUI.I.SetMainGameText(playerCount + " Player" + (playerCount == 1 ? "" : "s"));
+		GameUI.I.SetMainGameText(stateString);
 		GameUI.I.SetAlivePlayersText(alivePayerCount);
 	}
 
@@ -65,5 +69,9 @@ public class GameStateManager : NetworkBehaviour {
 		} else {
 			return minimumPlayerCount - playerCount;
 		}
+	}
+
+	public int GetAlivePlayerCount() {
+		return alivePayerCount;
 	}
 }

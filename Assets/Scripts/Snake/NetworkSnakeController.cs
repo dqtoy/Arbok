@@ -28,6 +28,12 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     public override void OnStartLocalPlayer() {
         Toolbox.Log("OnStartLocalPlayer " + Time.frameCount);
+
+        GlobalTick.OnInitialized += (tick) => {
+            Debug.Log("Snake GlobalTick.I.OnInitialized");
+            snake.SpawnOnNextTick();
+        };
+
         if (!isServer) {
             CmdRequestSnakePositions();
             CmdRequestApplePositions();
@@ -35,6 +41,7 @@ public class NetworkSnakeController : NetworkBehaviour {
             GlobalTick.I.ServerStart();
             initialized = true;
         }
+
         netIdUI.text = netId.ToString() + "*";
         MainCamera.I.target = snake.cameraTarget;
     }
@@ -73,14 +80,16 @@ public class NetworkSnakeController : NetworkBehaviour {
                     x.head.transform.position,
                     x.currentDirection.Serialize(),
                     linksJson,
-                    x.GetComponent<NetworkIdentity>().netId
+                    x.GetComponent<NetworkIdentity>().netId,
+                    x.isDead,
+                    GlobalTick.I.currentTick
                 );
             }
         );
     }
 
     [TargetRpc]
-    public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, short direction, string linksJson, NetworkInstanceId netId) {
+    public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, short direction, string linksJson, NetworkInstanceId netId, bool isDead, int tick) {
         if (netId == this.netId) return;
 
         var snakeToModify = Snake.all.First(x => x.GetComponent<NetworkIdentity>().netId == netId);
@@ -88,7 +97,8 @@ public class NetworkSnakeController : NetworkBehaviour {
         snakeToModify.SetSnakeData(new SnakeState() {
             linkPositions = JsonConvert.DeserializeObject<Vector3[]>(linksJson),
                 headPosition = position,
-                direction = Direction.Deserialize(direction)
+                direction = Direction.Deserialize(direction),
+                isDead = isDead
         });
 
         gotSnakes = true;
@@ -137,7 +147,7 @@ public class NetworkSnakeController : NetworkBehaviour {
     }
 
     void SendNewDirection(Direction direction) {
-        snake.ChangeDirectionAtNextTick(direction);
+        snake.DoEventAtNextTick(new SnakeChangeDirectionEvent(direction));
         CmdKeyDown(direction.Serialize(), GlobalTick.I.currentTick + 1);
     }
 

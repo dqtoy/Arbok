@@ -21,10 +21,8 @@ public class Snake : NetworkBehaviour {
     public SnakeEvents snakeEvents { get; private set; }
     public List<SnakeTail> links { get; private set; }
 
-    public event Action AfterTick;
     public event Action AfterRollbackTick;
 
-    public float cameraScalingMod = 1;
     public bool isDead;
 
     public static int GetAlivePlayerCount() {
@@ -36,29 +34,50 @@ public class Snake : NetworkBehaviour {
         snakeEvents = new SnakeEvents();
         links = new List<SnakeTail>();
         all.Add(this);
-        GlobalTick.OnInitialized += (tick) => {
-            Debug.Log("Snake GlobalTick.I.OnInitialized");
-            StartTicking();
-        };
+
+        isDead = true;
+        headVisual.SetActive(false);
+
+        StartTicking();
+    }
+
+    public void SpawnOnNextTick() {
+        DoEventAtNextTick(new SnakeSpawnEvent(), 10);
+        CmdSpawn(GlobalTick.I.currentTick + 10);
+    }
+
+    // ==============================
+    // Network
+    // ==============================
+    [Command]
+    private void CmdSpawn(int tick) {
+        RpcSpawn(tick);
+    }
+
+    [ClientRpc]
+    public void RpcSpawn(int tick) {
+        if (!isLocalPlayer) {
+            var snakeEvent = new SnakeSpawnEvent();
+            CorrectEventAtTick(snakeEvent, tick);
+        }
     }
 
     void Start() {
         Debug.Log("Snake Start " + Time.frameCount);
     }
 
-    void StartTicking() {
+    public void StartTicking() {
         GlobalTick.OnDoTick += DoTick;
         GlobalTick.OnRollbackTick += RollbackTick;
     }
 
     void Update() {
         cameraTarget.position = new Vector3(cameraTarget.position.x, links.Count + 1, cameraTarget.position.z);
-        // cameraTarget.localScale = new Vector3(links.Count * cameraScalingMod, 1, 1);
     }
 
-    public void ChangeDirectionAtNextTick(Direction newDirection) {
-        snakeEvents.PurgeTicksAfterTick(GlobalTick.I.currentTick);
-        snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick + 1, new SnakeChangeDirectionEvent(newDirection));
+    public void DoEventAtNextTick(SnakeEvent snakeEvent, int ticksInFuture = 1) {
+        snakeEvents.PurgeTicksAfterTick(GlobalTick.I.currentTick + ticksInFuture - 1);
+        snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick + ticksInFuture, snakeEvent);
     }
 
     public void CorrectEventAtTick(SnakeEvent snakeEvent, int tick) {
@@ -84,8 +103,6 @@ public class Snake : NetworkBehaviour {
         }
 
         snakeEvents.ExecuteEventsAtTickIfAny(GlobalTick.I.currentTick, this);
-
-        AfterTick?.Invoke();
     }
 
     void DoDeathCheck() {
@@ -135,6 +152,11 @@ public class Snake : NetworkBehaviour {
         this.head.transform.position = state.headPosition;
         this.currentDirection = state.direction;
         this.links = state.linkPositions.Select(x => Instantiate(snakeTailPrefab, x, Quaternion.identity, this.transform).GetComponent<SnakeTail>()).ToList();
+
+        if (state.isDead == false) {
+            isDead = false;
+            headVisual.SetActive(true);
+        }
     }
 
     void OnDestroy() {

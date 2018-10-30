@@ -58,6 +58,7 @@ public class SnakeEvents {
 
 public class SnakeCompoundEvent {
     static List<Type> priorityMap = new List<Type> {
+        typeof(SnakeSpawnEvent),
         typeof(SnakeDieEvent),
         typeof(SnakeEatAppleEvent),
         typeof(SnakeChangeDirectionEvent),
@@ -71,15 +72,17 @@ public class SnakeCompoundEvent {
     }
 
     public void Execute(Snake snake) {
-        foreach (var snakeEvent in events) {
-            snakeEvent?.Execute(snake);
-        }
+        events.Where(x => x != null).ToList().ForEach(snakeEvent => {
+            Debug.Log("Executing SnakeEvent: " + snakeEvent.GetType().Name);
+            snakeEvent.Execute(snake);
+        });
     }
 
     public void Reverse(Snake snake) {
-        foreach (var snakeEvent in events.Reverse()) {
+        events.Reverse().Where(x => x != null).ToList().ForEach(snakeEvent => {
+            Debug.Log("Reversing SnakeEvent: " + snakeEvent.GetType().Name);
             snakeEvent?.Reverse(snake);
-        }
+        });
     }
 }
 
@@ -185,14 +188,34 @@ public class SnakeEatAppleEvent : SnakeEvent {
     }
 
     public void Reverse(Snake snake) {
+        Debug.Log("SnakeEatAppleEvent Reverse1 snake.links.Count: " + snake.links.Count);
         var firstTailLink = snake.links.Last();
         snake.links.Remove(firstTailLink);
-        GameObject.Destroy(firstTailLink);
+        GameObject.Destroy(firstTailLink.gameObject);
         apple.gameObject.SetActive(true);
+        Debug.Log("SnakeEatAppleEvent Reverse2 snake.links.Count: " + snake.links.Count);
     }
 
     public override string ToString() {
         return "E";
+    }
+}
+
+public class SnakeSpawnEvent : SnakeEvent {
+    public void Execute(Snake snake) {
+        snake.isDead = false;
+        snake.headVisual.SetActive(true);
+        snake.links.ForEach(x => x.GetComponent<MeshRenderer>().enabled = true);
+    }
+
+    public void Reverse(Snake snake) {
+        snake.links.ForEach(x => x.GetComponent<MeshRenderer>().enabled = false);
+        snake.headVisual.SetActive(false);
+        snake.isDead = true;
+    }
+
+    public override string ToString() {
+        return "S";
     }
 }
 
