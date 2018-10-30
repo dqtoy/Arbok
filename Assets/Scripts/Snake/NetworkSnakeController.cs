@@ -121,7 +121,7 @@ public class NetworkSnakeController : NetworkBehaviour {
             Init();
         }
 
-        if (!initialized) return;
+        if (!initialized || snake.isDead) return;
 
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) {
             SendNewDirection(Up.I);
