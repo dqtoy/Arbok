@@ -144,10 +144,21 @@ public class GlobalTick : NetworkBehaviour {
 
 	void Init(int tick) {
 		Debug.Log("Init servertick: " + tick);
-		currentTick = tick;
+		if (!isServer) {
+			if (tick > currentTick) {
+				RollForwardToTick(tick);
+			} else {
+				throw new Exception("this shouldn't happen");
+			}
+		}
+		// currentTick = tick;
 		initialized = true;
 		elapsedTime = 0;
 		// elapsedTime = serverCurrentTickElapsedTime + (NetworkManager.singleton.client.GetRTT() / 2f / 1000f);
 		OnInitialized?.Invoke(currentTick);
+	}
+
+	public void SetTickForSnakeStuff(int tick) {
+		currentTick = tick;
 	}
 }

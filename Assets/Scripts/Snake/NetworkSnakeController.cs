@@ -72,6 +72,8 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     [Command]
     public void CmdRequestSnakePositions() {
+
+        // TODO Pass all snake in one call
         Snake.all.ForEach(
             x => {
                 var linksJson = JsonConvert.SerializeObject(x.links.Select(y => y.transform.position).ToArray());
@@ -91,6 +93,8 @@ public class NetworkSnakeController : NetworkBehaviour {
     [TargetRpc]
     public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, short direction, string linksJson, NetworkInstanceId netId, bool isDead, int tick) {
         if (netId == this.netId) return;
+
+        GlobalTick.I.SetTickForSnakeStuff(tick);
 
         var snakeToModify = Snake.all.First(x => x.GetComponent<NetworkIdentity>().netId == netId);
 

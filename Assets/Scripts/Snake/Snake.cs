@@ -57,8 +57,7 @@ public class Snake : NetworkBehaviour {
     [ClientRpc]
     public void RpcSpawn(int tick) {
         if (!isLocalPlayer) {
-            var snakeEvent = new SnakeSpawnEvent();
-            CorrectEventAtTick(snakeEvent, tick);
+            CorrectEventAtTick(new SnakeSpawnEvent(), tick);
         }
     }
 
