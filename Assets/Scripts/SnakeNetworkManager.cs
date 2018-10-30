@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 
 public class SnakeNetworkManager : NetworkManager {
+	public static SnakeNetworkManager I;
 
 	public GameObject blockFloorPrefab;
 
@@ -20,6 +21,10 @@ public class SnakeNetworkManager : NetworkManager {
 	// 	GlobalTick.I.Reset();
 	// }
 
+	void Awake() {
+		I = this;
+	}
+
 	public override void OnServerReady(NetworkConnection conn) {
 		Toolbox.Log("OnServerReady");
 		base.OnServerReady(conn);
@@ -28,7 +33,6 @@ public class SnakeNetworkManager : NetworkManager {
 	public override void OnClientConnect(NetworkConnection conn) {
 		Toolbox.Log("OnClientConnect");
 		base.OnClientConnect(conn);
-		Instantiate(blockFloorPrefab);
 	}
 
 	// TODO Not getting called
@@ -36,5 +40,9 @@ public class SnakeNetworkManager : NetworkManager {
 		Toolbox.Log("OnClientDisconnect");
 		base.OnClientDisconnect(conn);
 		Destroy(blockFloor);
+	}
+
+	public void SpawnBlockFloor() {
+		Instantiate(blockFloorPrefab);
 	}
 }

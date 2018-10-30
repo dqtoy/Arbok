@@ -26,14 +26,10 @@ public class BlockFloor : MonoBehaviour {
 	List<GameObject> dropBlocks = new List<GameObject>();
 
 	void Awake() {
+		Debug.Log("BlockFloor Awake");
 		I = this;
 		transform.localScale = Vector3.one;
 		startScale = transform.localScale;
-	}
-
-	// Use this for initialization
-	void Start() {
-		Debug.Log("BlockFloor Start");
 		SpawnFloor();
 		GlobalTick.OnInitialized += (tick) => {
 			Debug.Log("BlockFloor GlobalTick.I.OnInitialized");
@@ -48,6 +44,11 @@ public class BlockFloor : MonoBehaviour {
 				DoTick();
 			}
 		};
+	}
+
+	// Use this for initialization
+	void Start() {
+		Debug.Log("BlockFloor Start");
 	}
 
 	// Update is called once per frame

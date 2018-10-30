@@ -34,6 +34,8 @@ public class NetworkSnakeController : NetworkBehaviour {
             snake.SpawnOnNextTick();
         };
 
+        SnakeNetworkManager.I.SpawnBlockFloor();
+
         if (!isServer) {
             CmdRequestSnakePositions();
             CmdRequestApplePositions();
