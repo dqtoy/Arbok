@@ -143,9 +143,8 @@ public class GlobalTick : NetworkBehaviour {
 		Debug.Log("Init");
 		currentTick = tick;
 		initialized = true;
-		elapsedTime += NetworkManager.singleton.client.GetRTT() / 2;
+		elapsedTime = 0;
 		// elapsedTime = serverCurrentTickElapsedTime + (NetworkManager.singleton.client.GetRTT() / 2f / 1000f);
-		// elapsedTime = 0;
 		OnInitialized?.Invoke(currentTick);
 	}
 }
