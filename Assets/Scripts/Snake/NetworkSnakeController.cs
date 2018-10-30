@@ -13,6 +13,11 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     Snake snake;
 
+    bool gotApples = false;
+    bool gotSnakes = false;
+    bool initialized = false;
+    bool ready = false;
+
     public void Awake() {
         snake = GetComponent<Snake>();
     }
@@ -22,10 +27,16 @@ public class NetworkSnakeController : NetworkBehaviour {
     }
 
     public override void OnStartLocalPlayer() {
-        CmdRequestSnakePositions();
+        Toolbox.Log("OnStartLocalPlayer " + Time.frameCount);
+        if (!isServer) {
+            CmdRequestSnakePositions();
+            CmdRequestApplePositions();
+        } else {
+            GlobalTick.I.ServerStart();
+            initialized = true;
+        }
         netIdUI.text = netId.ToString() + "*";
         MainCamera.I.target = snake.cameraTarget;
-        CmdRequestApplePositions();
     }
 
     [Command]
@@ -48,6 +59,8 @@ public class NetworkSnakeController : NetworkBehaviour {
         } else {
             AppleManager.EnableAll();
         }
+
+        gotApples = true;
     }
 
     [Command]
@@ -77,14 +90,22 @@ public class NetworkSnakeController : NetworkBehaviour {
                 headPosition = position,
                 direction = Direction.Deserialize(direction)
         });
+
+        gotSnakes = true;
     }
 
     void Update() {
         if (!isLocalPlayer) return;
 
-        if (isLocalPlayer && Input.GetKeyDown(KeyCode.J)) {
-            Destroy(snake.gameObject);
+        if (Input.GetKeyDown(KeyCode.Alpha0)) {
+            Toolbox.Log(snake.snakeEvents.ToString());
         }
+
+        if (!ready && gotApples && gotSnakes) {
+            Init();
+        }
+
+        if (!initialized) return;
 
         if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) {
             SendNewDirection(Up.I);
@@ -98,9 +119,21 @@ public class NetworkSnakeController : NetworkBehaviour {
         if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) {
             SendNewDirection(Left.I);
         }
-        if (Input.GetKeyDown(KeyCode.Alpha0)) {
-            Toolbox.Log(snake.snakeEvents.ToString());
-        }
+    }
+
+    [Client]
+    void Init() {
+        GlobalTick.OnInitialized += (tick) => {
+            Debug.Log("NetworkSnakeController GlobalTick.I.OnInitialized netId: " + netId);
+            initialized = true;
+        };
+        CmdTellGlobalTickToSendTickToClient();
+        ready = true;
+    }
+
+    [Command]
+    private void CmdTellGlobalTickToSendTickToClient() {
+        GlobalTick.I.InitTickForNewClient(connectionToClient);
     }
 
     void SendNewDirection(Direction direction) {

@@ -32,12 +32,21 @@ public class Snake : NetworkBehaviour {
     }
 
     void Awake() {
+        Debug.Log("Snake Awake Frame: " + Time.frameCount);
         snakeEvents = new SnakeEvents();
         links = new List<SnakeTail>();
         all.Add(this);
+        GlobalTick.OnInitialized += (tick) => {
+            Debug.Log("Snake GlobalTick.I.OnInitialized");
+            StartTicking();
+        };
     }
 
     void Start() {
+        Debug.Log("Snake Start " + Time.frameCount);
+    }
+
+    void StartTicking() {
         GlobalTick.OnDoTick += DoTick;
         GlobalTick.OnRollbackTick += RollbackTick;
     }
@@ -107,7 +116,7 @@ public class Snake : NetworkBehaviour {
     }
 
     void DoAppleEatCheck() {
-        var apple = AppleManager.all.FirstOrDefault(x => (x.transform.position == head.transform.position));
+        var apple = AppleManager.all.FirstOrDefault(x => (x.gameObject.activeSelf && x.transform.position == head.transform.position));
 
         if (apple) EatApple(apple);
     }

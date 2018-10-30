@@ -32,10 +32,12 @@ public class GlobalTick : NetworkBehaviour {
 	}
 
 	void Start() {
-		Debug.Log("GlobalTick Start");
-		if (isServer) {
-			StartCoroutine(SyncTickLoop());
-		}
+		Debug.Log("GlobalTick Start Time.frameCount: " + Time.frameCount);
+	}
+
+	public void ServerStart() {
+		Init(0);
+		StartCoroutine(SyncTickLoop());
 	}
 
 	[Server]
@@ -60,6 +62,7 @@ public class GlobalTick : NetworkBehaviour {
 
 	void Update() {
 		DebugScreen.I.globalTickNetID.text = netId.Value.ToString();
+
 		if (!initialized) return;
 
 		elapsedTime += Time.deltaTime;
@@ -130,17 +133,17 @@ public class GlobalTick : NetworkBehaviour {
 	[Server]
 	public void InitTickForNewClient(NetworkConnection connection) {
 		Debug.Log("InitTickForNewClient");
-		TargetInitTick(connection, currentTick, elapsedTime);
+		TargetInitTick(connection, this.currentTick);
 	}
 
 	[TargetRpc]
-	public void TargetInitTick(NetworkConnection connection, int tick, float serverCurrentTickElapsedTime) {
+	public void TargetInitTick(NetworkConnection connection, int tick) {
 		Debug.Log("RpcInitTick");
-		Init(tick, serverCurrentTickElapsedTime);
+		Init(tick);
 	}
 
-	public void Init(int tick, float serverCurrentTickElapsedTime) {
-		Debug.Log("Init");
+	void Init(int tick) {
+		Debug.Log("Init servertick: " + tick);
 		currentTick = tick;
 		initialized = true;
 		elapsedTime = 0;

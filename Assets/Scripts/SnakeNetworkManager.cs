@@ -23,8 +23,6 @@ public class SnakeNetworkManager : NetworkManager {
 	public override void OnServerReady(NetworkConnection conn) {
 		Toolbox.Log("OnServerReady");
 		base.OnServerReady(conn);
-
-		GlobalTick.I.InitTickForNewClient(conn);
 	}
 
 	public override void OnClientConnect(NetworkConnection conn) {

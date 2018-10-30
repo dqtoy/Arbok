@@ -31,6 +31,7 @@ PHASE ARBOK
 - [ ] interpolation of snake movement
 - [ ] playback game after game ends
 - [x] make snake death a reversible event
+- [ ] maybe sync entire event list of snakes when joining in progress game?
 
 ## Possible Issues
 - Apple syncing
@@ -46,3 +47,12 @@ PHASE ARBOK
 - [ ] start countdown once enough players
 - [ ] start game at end of countdown
 
+## Host Server
+- snake spawn
+
+## Join Server
+- snake spawn
+- other snakes updated
+- apples updated
+- GlobalTick in sync with server
+- turn on snake
