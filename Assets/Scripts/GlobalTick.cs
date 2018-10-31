@@ -27,7 +27,7 @@ public class GlobalTick : NetworkBehaviour {
 	bool initialized = false;
 
 	void Awake() {
-		Debug.Log("GlobalTick Awake");
+		Debug.Log("GlobalTick Awake " + GetInstanceID());
 		I = this;
 	}
 
@@ -35,6 +35,7 @@ public class GlobalTick : NetworkBehaviour {
 		Debug.Log("GlobalTick Start Time.frameCount: " + Time.frameCount);
 	}
 
+	[Server]
 	public void ServerStart() {
 		Init(0);
 		StartCoroutine(SyncTickLoop());
@@ -139,18 +140,18 @@ public class GlobalTick : NetworkBehaviour {
 	[TargetRpc]
 	public void TargetInitTick(NetworkConnection connection, int tick) {
 		Debug.Log("RpcInitTick");
+		if (!isServer) {
+			if (tick > currentTick) {
+				RollForwardToTick(tick);
+			} else if (tick < currentTick) {
+				throw new Exception("this shouldn't happen");
+			}
+		}
 		Init(tick);
 	}
 
 	void Init(int tick) {
 		Debug.Log("Init servertick: " + tick);
-		if (!isServer) {
-			if (tick > currentTick) {
-				RollForwardToTick(tick);
-			} else {
-				throw new Exception("this shouldn't happen");
-			}
-		}
 		// currentTick = tick;
 		initialized = true;
 		elapsedTime = 0;

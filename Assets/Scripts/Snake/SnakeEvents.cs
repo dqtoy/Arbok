@@ -73,14 +73,14 @@ public class SnakeCompoundEvent {
 
     public void Execute(Snake snake) {
         events.Where(x => x != null).ToList().ForEach(snakeEvent => {
-            Debug.Log("Executing SnakeEvent: " + snakeEvent.GetType().Name);
+            // Debug.Log("Executing SnakeEvent: " + snakeEvent.GetType().Name);
             snakeEvent.Execute(snake);
         });
     }
 
     public void Reverse(Snake snake) {
         events.Reverse().Where(x => x != null).ToList().ForEach(snakeEvent => {
-            Debug.Log("Reversing SnakeEvent: " + snakeEvent.GetType().Name);
+            // Debug.Log("Reversing SnakeEvent: " + snakeEvent.GetType().Name);
             snakeEvent?.Reverse(snake);
         });
     }

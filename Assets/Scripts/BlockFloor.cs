@@ -31,24 +31,26 @@ public class BlockFloor : MonoBehaviour {
 		transform.localScale = Vector3.one;
 		startScale = transform.localScale;
 		SpawnFloor();
-		GlobalTick.OnInitialized += (tick) => {
-			Debug.Log("BlockFloor GlobalTick.I.OnInitialized");
-
-			killBlocks.Clear();
-			nextDrops.Clear();
-			dropDirectionIndexes.Clear();
-			dropBlocks.Clear();
-
-			StartDropping();
-			for (int i = 0; i < tick; i++) {
-				DoTick();
-			}
-		};
+		GlobalTick.OnInitialized += Init;
 	}
 
 	// Use this for initialization
 	void Start() {
 		Debug.Log("BlockFloor Start");
+	}
+
+	void Init(int tick) {
+		Debug.Log("BlockFloor GlobalTick.OnInitialized");
+
+		killBlocks.Clear();
+		nextDrops.Clear();
+		dropDirectionIndexes.Clear();
+		dropBlocks.Clear();
+
+		StartDropping();
+		for (int i = 0; i < tick; i++) {
+			DoTick();
+		}
 	}
 
 	// Update is called once per frame
@@ -95,6 +97,7 @@ public class BlockFloor : MonoBehaviour {
 	}
 
 	public void StopDropping() {
+		Debug.Log("BlockFloor StopDropping");
 		GlobalTick.OnDoTick -= DoTick;
 		GlobalTick.OnRollbackTick -= RollbackTick;
 	}
@@ -172,5 +175,7 @@ public class BlockFloor : MonoBehaviour {
 
 	void OnDestroy() {
 		StopDropping();
+		GlobalTick.OnInitialized -= Init;
+		I = null;
 	}
 }

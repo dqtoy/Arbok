@@ -30,6 +30,7 @@ public class Snake : NetworkBehaviour {
     }
 
     void Awake() {
+        Debug.Log("Snake Awake: " + GetInstanceID());
         Debug.Log("Snake Awake Frame: " + Time.frameCount);
         snakeEvents = new SnakeEvents();
         links = new List<SnakeTail>();
@@ -42,6 +43,7 @@ public class Snake : NetworkBehaviour {
     }
 
     public void SpawnOnNextTick() {
+        Debug.Log("Snake SpawnOnNextTick: " + GetInstanceID());
         DoEventAtNextTick(new SnakeSpawnEvent(), 10);
         CmdSpawn(GlobalTick.I.currentTick + 10);
     }

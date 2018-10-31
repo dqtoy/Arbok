@@ -27,20 +27,14 @@ public class NetworkSnakeController : NetworkBehaviour {
     }
 
     public override void OnStartLocalPlayer() {
-        Toolbox.Log("OnStartLocalPlayer " + Time.frameCount);
+        Toolbox.Log("NetworkSnakeController OnStartLocalPlayer " + Time.frameCount);
 
-        GlobalTick.OnInitialized += (tick) => {
-            Debug.Log("Snake GlobalTick.I.OnInitialized");
-            snake.SpawnOnNextTick();
-        };
-
-        SnakeNetworkManager.I.SpawnBlockFloor();
+        GlobalTick.OnInitialized += OnGlobalTickInitialized;
 
         if (!isServer) {
             CmdRequestSnakePositions();
             CmdRequestApplePositions();
         } else {
-            GlobalTick.I.ServerStart();
             initialized = true;
         }
 
@@ -48,9 +42,15 @@ public class NetworkSnakeController : NetworkBehaviour {
         MainCamera.I.target = snake.cameraTarget;
     }
 
+    void OnGlobalTickInitialized(int tick) {
+        Debug.Log("NetworkSnakeController OnGlobalTickInitialized");
+        initialized = true;
+        snake.SpawnOnNextTick();
+    }
+
     [Command]
     public void CmdRequestApplePositions() {
-        Toolbox.Log("CmdRequestApplePositions");
+        Toolbox.Log("NetworkSnakeController CmdRequestApplePositions");
         TargetReceiveApplePositions(
             connectionToClient,
             JsonConvert.SerializeObject(AppleManager.all.Select(x => x.ToState()).ToArray())
@@ -139,10 +139,6 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     [Client]
     void Init() {
-        GlobalTick.OnInitialized += (tick) => {
-            Debug.Log("NetworkSnakeController GlobalTick.I.OnInitialized netId: " + netId);
-            initialized = true;
-        };
         CmdTellGlobalTickToSendTickToClient();
         ready = true;
     }
@@ -174,5 +170,9 @@ public class NetworkSnakeController : NetworkBehaviour {
             receivedEvents = x.ToArray();
             snake.CorrectEventAtTick(snakeEvent, tick);
         }
+    }
+
+    void OnDestroy() {
+        GlobalTick.OnInitialized -= OnGlobalTickInitialized;
     }
 }

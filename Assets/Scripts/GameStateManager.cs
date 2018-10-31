@@ -27,6 +27,7 @@ public class GameStateManager : NetworkBehaviour {
 
 		Toolbox.Log("SnakeServer Start");
 		state = GetComponent<GameWaiting>();
+		state.Enter();
 		stateString = state.GetType().Name;
 	}
 
@@ -73,5 +74,9 @@ public class GameStateManager : NetworkBehaviour {
 
 	public int GetAlivePlayerCount() {
 		return alivePayerCount;
+	}
+
+	void OnDestroy() {
+		Destroy(BlockFloor.I.gameObject);
 	}
 }

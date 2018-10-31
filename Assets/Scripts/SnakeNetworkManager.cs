@@ -6,23 +6,33 @@ using UnityEngine.Networking;
 public class SnakeNetworkManager : NetworkManager {
 	public static SnakeNetworkManager I;
 
-	public GameObject blockFloorPrefab;
+	public GameObject gameStateManagerPrefab;
+	public GameObject[] spawnOnClientConnect;
 
 	GameObject blockFloor;
 
-	// public override void OnServerReady(NetworkConnection conn) {
-	// 	Toolbox.Log("OnServerReady: " + conn.connectionId);
-	// 	Snake.all.ForEach(x => x.DoFoo(conn));
-	// }
-
-	// public override void OnClientConnect(NetworkConnection conn) {
-	// 	Toolbox.Log("OnClientConnect");
-	// 	base.OnClientConnect(conn);
-	// 	GlobalTick.I.Reset();
-	// }
-
 	void Awake() {
 		I = this;
+	}
+
+	// Called first but server isn't setup yet
+	public override void OnStartServer() {
+		Toolbox.Log("OnStartServer");
+		base.OnStartServer();
+	}
+
+	public override void OnClientConnect(NetworkConnection conn) {
+		Toolbox.Log("OnClientConnect");
+
+		foreach (var go in spawnOnClientConnect) {
+			Instantiate(go);
+		}
+
+		base.OnClientConnect(conn);
+
+		if (NetworkServer.active) {
+			NetworkServer.Spawn(Instantiate(gameStateManagerPrefab));
+		}
 	}
 
 	public override void OnServerReady(NetworkConnection conn) {
@@ -30,19 +40,9 @@ public class SnakeNetworkManager : NetworkManager {
 		base.OnServerReady(conn);
 	}
 
-	public override void OnClientConnect(NetworkConnection conn) {
-		Toolbox.Log("OnClientConnect");
-		base.OnClientConnect(conn);
-	}
-
 	// TODO Not getting called
 	public override void OnClientDisconnect(NetworkConnection conn) {
 		Toolbox.Log("OnClientDisconnect");
 		base.OnClientDisconnect(conn);
-		Destroy(blockFloor);
-	}
-
-	public void SpawnBlockFloor() {
-		Instantiate(blockFloorPrefab);
 	}
 }
