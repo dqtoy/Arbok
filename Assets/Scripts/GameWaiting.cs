@@ -30,5 +30,7 @@ public class GameWaiting : GameState {
 		var globalTick = Instantiate(globalTickPrefab);
 		globalTick.GetComponent<GlobalTick>().ServerStart();
 		NetworkServer.Spawn(globalTick);
+
+		AppleManager.I.SpawnStartingApples();
 	}
 }

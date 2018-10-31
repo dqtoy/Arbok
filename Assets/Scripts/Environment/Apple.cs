@@ -5,8 +5,8 @@ using UnityEngine;
 public class Apple : MonoBehaviour {
 
 	// Use this for initialization
-	void Awake() {
-		AppleManager.all.Add(this);
+	void Start() {
+		AppleManager.I.all.Add(this);
 	}
 
 	// Update is called once per frame

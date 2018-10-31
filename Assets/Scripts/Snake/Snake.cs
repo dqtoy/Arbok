@@ -133,7 +133,7 @@ public class Snake : NetworkBehaviour {
     }
 
     void DoAppleEatCheck() {
-        var apple = AppleManager.all.FirstOrDefault(x => (x.gameObject.activeSelf && x.transform.position == head.transform.position));
+        var apple = AppleManager.I.all.FirstOrDefault(x => (x.gameObject.activeSelf && x.transform.position == head.transform.position));
 
         if (apple) EatApple(apple);
     }
