@@ -221,12 +221,19 @@ public class SnakeSpawnEvent : SnakeEvent {
 
 public class SnakeDieEvent : SnakeEvent {
     public void Execute(Snake snake) {
+        DoExecute(snake);
+    }
+    public static void DoExecute(Snake snake) {
         snake.isDead = true;
         snake.headVisual.SetActive(false);
         snake.links.ForEach(x => x.GetComponent<MeshRenderer>().enabled = false);
     }
 
     public void Reverse(Snake snake) {
+        DoReverse(snake);
+    }
+
+    public static void DoReverse(Snake snake) {
         snake.links.ForEach(x => x.GetComponent<MeshRenderer>().enabled = true);
         snake.headVisual.SetActive(true);
         snake.isDead = false;

@@ -36,8 +36,7 @@ public class Snake : NetworkBehaviour {
         links = new List<SnakeTail>();
         all.Add(this);
 
-        isDead = true;
-        headVisual.SetActive(false);
+        SnakeDieEvent.DoExecute(this);
 
         StartTicking();
     }
@@ -155,8 +154,9 @@ public class Snake : NetworkBehaviour {
         this.links = state.linkPositions.Select(x => Instantiate(snakeTailPrefab, x, Quaternion.identity, this.transform).GetComponent<SnakeTail>()).ToList();
 
         if (state.isDead == false) {
-            isDead = false;
-            headVisual.SetActive(true);
+            SnakeDieEvent.DoReverse(this);
+        } else {
+            SnakeDieEvent.DoExecute(this);
         }
     }
 
