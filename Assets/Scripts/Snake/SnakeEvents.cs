@@ -3,29 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class SnakeEvents {
-    public SortedDictionary<int, SnakeCompoundEvent> dict = new SortedDictionary<int, SnakeCompoundEvent>();
+public class GameEvents<T, U> where T : CompoundGameEvent<U>, new() where U : ITickable {
+    public SortedDictionary<int, T> dict = new SortedDictionary<int, T>();
 
-    public void AddOrReplaceAtTick(int tick, SnakeEvent snakeEvent) {
+    public void AddOrReplaceAtTick(int tick, GameEvent<U> gameEvent) {
         if (dict.ContainsKey(tick) == false) {
-            dict[tick] = new SnakeCompoundEvent();
+            dict[tick] = new T();
         }
-        dict[tick].AddOrReplaceEvent(snakeEvent);
+        dict[tick].AddOrReplaceEvent(gameEvent);
     }
 
     public bool HasEventAtTick(int tick) {
         return dict.ContainsKey(tick);
     }
 
-    public void ExecuteEventsAtTickIfAny(int tick, Snake snake) {
+    public void ExecuteEventsAtTickIfAny(int tick, U actor) {
         if (dict.ContainsKey(tick)) {
-            dict[tick].Execute(snake);
+            dict[tick].Execute(actor);
         }
     }
 
-    public void ReverseEventsAtTickIfAny(int tick, Snake snake) {
+    public void ReverseEventsAtTickIfAny(int tick, U actor) {
         if (dict.ContainsKey(tick)) {
-            dict[tick].Reverse(snake);
+            dict[tick].Reverse(actor);
         }
     }
 
@@ -56,7 +56,41 @@ public class SnakeEvents {
     }
 }
 
-public class SnakeCompoundEvent {
+public abstract class CompoundGameEvent<T> {
+    public abstract IList<Type> PriorityMap { get; }
+
+    public GameEvent<T>[] events;
+
+    public CompoundGameEvent() {
+        this.events = new GameEvent<T>[PriorityMap.Count()];
+    }
+
+    public void AddOrReplaceEvent(GameEvent<T> gameEvent) {
+        events[PriorityMap.IndexOf(gameEvent.GetType())] = gameEvent;
+    }
+
+    public void Execute(T actor) {
+        events.Where(x => x != null).ToList().ForEach(gameEvent => {
+            // Toolbox.Log("Executing GameEvent: " + gameEvent.GetType().Name);
+            gameEvent.Execute(actor);
+        });
+    }
+
+    public void Reverse(T actor) {
+        events.Reverse().Where(x => x != null).ToList().ForEach(gameEvent => {
+            // Toolbox.Log("Reversing GameEvent: " + gameEvent.GetType().Name);
+            gameEvent?.Reverse(actor);
+        });
+    }
+}
+
+public interface GameEvent<T> {
+    void Execute(T actor);
+    void Reverse(T actor);
+}
+
+public class SnakeCompoundEvent : CompoundGameEvent<Snake> {
+    public override IList<Type> PriorityMap => priorityMap;
     static List<Type> priorityMap = new List<Type> {
         typeof(SnakeSpawnEvent),
         typeof(SnakeDieEvent),
@@ -64,34 +98,9 @@ public class SnakeCompoundEvent {
         typeof(SnakeChangeDirectionEvent),
         typeof(SnakeMoveEvent),
     };
-
-    public SnakeEvent[] events = new SnakeEvent[priorityMap.Count()];
-
-    public void AddOrReplaceEvent(SnakeEvent snakeEvent) {
-        events[priorityMap.IndexOf(snakeEvent.GetType())] = snakeEvent;
-    }
-
-    public void Execute(Snake snake) {
-        events.Where(x => x != null).ToList().ForEach(snakeEvent => {
-            // Debug.Log("Executing SnakeEvent: " + snakeEvent.GetType().Name);
-            snakeEvent.Execute(snake);
-        });
-    }
-
-    public void Reverse(Snake snake) {
-        events.Reverse().Where(x => x != null).ToList().ForEach(snakeEvent => {
-            // Debug.Log("Reversing SnakeEvent: " + snakeEvent.GetType().Name);
-            snakeEvent?.Reverse(snake);
-        });
-    }
 }
 
-public interface SnakeEvent {
-    void Execute(Snake snake);
-    void Reverse(Snake snake);
-}
-
-class SnakeMoveEvent : SnakeEvent {
+class SnakeMoveEvent : GameEvent<Snake> {
     Vector3 oldTailPosition;
 
     public void Execute(Snake snake) {
@@ -135,7 +144,7 @@ class SnakeMoveEvent : SnakeEvent {
     }
 }
 
-public class SnakeChangeDirectionEvent : SnakeEvent {
+public class SnakeChangeDirectionEvent : GameEvent<Snake> {
     Direction previousDirection = DummyDirection.I;
     public Direction newDirection { get; private set; }
 
@@ -174,7 +183,7 @@ public class SnakeChangeDirectionEvent : SnakeEvent {
     }
 }
 
-public class SnakeEatAppleEvent : SnakeEvent {
+public class SnakeEatAppleEvent : GameEvent<Snake> {
     Apple apple;
 
     public SnakeEatAppleEvent(Apple apple) {
@@ -201,7 +210,7 @@ public class SnakeEatAppleEvent : SnakeEvent {
     }
 }
 
-public class SnakeSpawnEvent : SnakeEvent {
+public class SnakeSpawnEvent : GameEvent<Snake> {
     public void Execute(Snake snake) {
         snake.isDead = false;
         snake.headVisual.SetActive(true);
@@ -219,7 +228,7 @@ public class SnakeSpawnEvent : SnakeEvent {
     }
 }
 
-public class SnakeDieEvent : SnakeEvent {
+public class SnakeDieEvent : GameEvent<Snake> {
     public void Execute(Snake snake) {
         DoExecute(snake);
     }

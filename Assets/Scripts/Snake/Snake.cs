@@ -18,7 +18,7 @@ public class Snake : NetworkBehaviour, ITickable {
 
     public Direction currentDirection = Up.I;
 
-    public SnakeEvents snakeEvents { get; private set; }
+    public GameEvents<SnakeCompoundEvent, Snake> snakeEvents { get; private set; }
     public List<SnakeTail> links { get; private set; }
 
     public event Action AfterRollbackTick;
@@ -32,7 +32,7 @@ public class Snake : NetworkBehaviour, ITickable {
     void Awake() {
         Debug.Log("Snake Awake: " + GetInstanceID());
         Debug.Log("Snake Awake Frame: " + Time.frameCount);
-        snakeEvents = new SnakeEvents();
+        snakeEvents = new GameEvents<SnakeCompoundEvent, Snake>();
         links = new List<SnakeTail>();
         all.Add(this);
 
@@ -75,12 +75,12 @@ public class Snake : NetworkBehaviour, ITickable {
         cameraTarget.position = new Vector3(cameraTarget.position.x, links.Count + 1, cameraTarget.position.z);
     }
 
-    public void DoEventAtNextTick(SnakeEvent snakeEvent, int ticksInFuture = 1) {
+    public void DoEventAtNextTick(GameEvent<Snake> snakeEvent, int ticksInFuture = 1) {
         snakeEvents.PurgeTicksAfterTick(GlobalTick.I.currentTick + ticksInFuture - 1);
         snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick + ticksInFuture, snakeEvent);
     }
 
-    public void CorrectEventAtTick(SnakeEvent snakeEvent, int tick) {
+    public void CorrectEventAtTick(GameEvent<Snake> snakeEvent, int tick) {
         var missedTick = tick <= GlobalTick.I.currentTick;
 
         if (missedTick) {
