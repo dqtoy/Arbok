@@ -43,8 +43,9 @@ public class Snake : NetworkBehaviour, ITickable {
 
     public void SpawnOnNextTick() {
         Debug.Log("Snake SpawnOnNextTick: " + GetInstanceID());
-        DoEventAtNextTick(new SnakeSpawnEvent(), 10);
-        CmdSpawn(GlobalTick.I.currentTick + 10);
+        var ticksAhead = 1;
+        DoEventAtNextTick(new SnakeSpawnEvent(), ticksAhead);
+        CmdSpawn(GlobalTick.I.currentTick + ticksAhead);
     }
 
     // ==============================
@@ -58,7 +59,7 @@ public class Snake : NetworkBehaviour, ITickable {
     [ClientRpc]
     public void RpcSpawn(int tick) {
         if (!isLocalPlayer) {
-            CorrectEventAtTick(new SnakeSpawnEvent(), tick);
+            snakeEvents.CorrectEventAtTick(new SnakeSpawnEvent(), tick);
         }
     }
 
@@ -78,21 +79,6 @@ public class Snake : NetworkBehaviour, ITickable {
     public void DoEventAtNextTick(GameEvent<Snake> snakeEvent, int ticksInFuture = 1) {
         snakeEvents.PurgeTicksAfterTick(GlobalTick.I.currentTick + ticksInFuture - 1);
         snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick + ticksInFuture, snakeEvent);
-    }
-
-    public void CorrectEventAtTick(GameEvent<Snake> snakeEvent, int tick) {
-        var missedTick = tick <= GlobalTick.I.currentTick;
-
-        if (missedTick) {
-            var realCurrentTick = GlobalTick.I.currentTick;
-            GlobalTick.I.RollbackToTick(tick - 1);
-            snakeEvents.PurgeTicksAfterTick(GlobalTick.I.currentTick);
-            snakeEvents.AddOrReplaceAtTick(tick, snakeEvent);
-            GlobalTick.I.RollForwardToTick(realCurrentTick);
-        } else {
-            snakeEvents.AddOrReplaceAtTick(tick, snakeEvent);
-            // TODO If this happens, then we are behind and need to fastforward
-        }
     }
 
     public void DoTick() {

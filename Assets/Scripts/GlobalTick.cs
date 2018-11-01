@@ -66,8 +66,6 @@ public class GlobalTick : NetworkBehaviour {
 
 		if (!initialized) return;
 
-		elapsedTime += Time.deltaTime;
-
 		if (Input.GetKeyDown(KeyCode.P)) {
 			manualTickDebugMode = !manualTickDebugMode;
 		}
@@ -81,6 +79,8 @@ public class GlobalTick : NetworkBehaviour {
 				RollbackTick();
 			}
 		} else {
+			elapsedTime += Time.deltaTime;
+
 			if (elapsedTime > (1 / ticksPerSecond)) {
 				elapsedTime -= 1 / ticksPerSecond;
 				DoTick();

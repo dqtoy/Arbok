@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 using UnityEngine;
 using UnityEngine.Networking;
 using Random = UnityEngine.Random;
@@ -15,14 +16,22 @@ public class AppleManager : NetworkBehaviour, ITickable {
 	public int spawnAreaSize;
 	public int deadZoneSize;
 
+	public GameEvents<AppleCompoundEvent, AppleManager> appleEvents { get; private set; }
+
 	void Awake() {
 		I = this;
+
+		appleEvents = new GameEvents<AppleCompoundEvent, AppleManager>();
+		GlobalTick.OnDoTick += DoTick;
+		GlobalTick.OnRollbackTick += RollbackTick;
 	}
 
 	[Server]
-	public void SpawnStartingApples() {
-		Toolbox.Log("AppleManager SpawnStartingApples");
+	public void ServerStart() {
+		Toolbox.Log("AppleManager ServerStart");
+
 		Reset();
+
 		for (int i = 0; i < startingAppleCount; i++) {
 			SpawnRandomApple();
 		}
@@ -70,11 +79,33 @@ public class AppleManager : NetworkBehaviour, ITickable {
 	}
 
 	public void DoTick() {
-		throw new System.NotImplementedException();
+		if (isServer) ServerTick();
+
+		appleEvents.ExecuteEventsAtTickIfAny(GlobalTick.I.currentTick, this);
+	}
+
+	[Server]
+	void ServerTick() {
+		if (GlobalTick.I.currentTick % 10 == 0) {
+			var newPos = RandomSpawnPosition();
+			var tickToSpawn = GlobalTick.I.currentTick;
+			appleEvents.AddOrReplaceAtTick(tickToSpawn, new AppleSpawnEvent(newPos));
+			Toolbox.Log("AppleManager ServerTick % 10 " + tickToSpawn + JsonConvert.SerializeObject(newPos));
+			RpcReceiveSpawn(tickToSpawn, newPos);
+		}
+	}
+
+	[ClientRpc]
+	void RpcReceiveSpawn(int tick, Vector3 pos) {
+		Toolbox.Log("AppleManager RpcReceiveSpawn " + tick + JsonConvert.SerializeObject(pos));
+		if (!isServer) {
+			Toolbox.Log("AppleManager RpcReceiveSpawn !isServer");
+			appleEvents.CorrectEventAtTick(new AppleSpawnEvent(pos), tick);
+		}
 	}
 
 	public void RollbackTick() {
-		throw new System.NotImplementedException();
+		appleEvents.ReverseEventsAtTickIfAny(GlobalTick.I.currentTick, this);
 	}
 
 	public bool IsAliveAppleAtPosition(Vector3 pos) {

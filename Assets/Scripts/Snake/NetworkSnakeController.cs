@@ -165,7 +165,7 @@ public class NetworkSnakeController : NetworkBehaviour {
             var x = receivedEvents.ToList();
             x.Add(snakeEvent.newDirection.GetType().ToString());
             receivedEvents = x.ToArray();
-            snake.CorrectEventAtTick(snakeEvent, tick);
+            snake.snakeEvents.CorrectEventAtTick(snakeEvent, tick);
         }
     }
 

@@ -16,6 +16,21 @@ public class GameEvents<T, U> where T : CompoundGameEvent<U>, new() {
         return dict.ContainsKey(tick);
     }
 
+    public void CorrectEventAtTick(GameEvent<U> gameEvent, int tick) {
+        var missedTick = tick <= GlobalTick.I.currentTick;
+
+        if (missedTick) {
+            var realCurrentTick = GlobalTick.I.currentTick;
+            GlobalTick.I.RollbackToTick(tick - 1);
+            PurgeTicksAfterTick(GlobalTick.I.currentTick);
+            AddOrReplaceAtTick(tick, gameEvent);
+            GlobalTick.I.RollForwardToTick(realCurrentTick);
+        } else {
+            AddOrReplaceAtTick(tick, gameEvent);
+            // TODO If this happens, then we are behind and need to fastforward
+        }
+    }
+
     public void ExecuteEventsAtTickIfAny(int tick, U actor) {
         if (dict.ContainsKey(tick)) {
             dict[tick].Execute(actor);
