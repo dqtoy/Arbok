@@ -123,13 +123,13 @@ public class Snake : NetworkBehaviour, ITickable {
     bool doesPositionMatchHeadPosition(MonoBehaviour x) => x.transform.position == head.transform.position;
 
     void DoAppleEatCheck() {
-        var apple = AppleManager.I.all.FirstOrDefault(x => (x.gameObject.activeSelf && x.transform.position == head.transform.position));
-
-        if (apple) EatApple(apple);
+        if (AppleManager.I.IsAliveAppleAtPosition(head.transform.position)) {
+            EatApple(head.transform.position);
+        }
     }
 
-    void EatApple(Apple apple) {
-        snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick, new SnakeEatAppleEvent(apple));
+    void EatApple(Vector3 applePos) {
+        snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick, new SnakeEatAppleEvent(applePos));
     }
 
     public void RollbackTick() {

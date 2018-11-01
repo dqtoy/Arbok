@@ -98,14 +98,14 @@ public class SnakeChangeDirectionEvent : GameEvent<Snake> {
 }
 
 public class SnakeEatAppleEvent : GameEvent<Snake> {
-    Apple apple;
+    Vector3 applePos;
 
-    public SnakeEatAppleEvent(Apple apple) {
-        this.apple = apple;
+    public SnakeEatAppleEvent(Vector3 applePos) {
+        this.applePos = applePos;
     }
 
     public void Execute(Snake snake) {
-        apple.gameObject.SetActive(false);
+        AppleManager.I.DeSpawnApple(applePos);
         var newTail = GameObject.Instantiate(snake.snakeTailPrefab, snake.transform);
         snake.links.Add(newTail.GetComponent<SnakeTail>());
     }
@@ -115,7 +115,7 @@ public class SnakeEatAppleEvent : GameEvent<Snake> {
         var firstTailLink = snake.links.Last();
         snake.links.Remove(firstTailLink);
         GameObject.Destroy(firstTailLink.gameObject);
-        apple.gameObject.SetActive(true);
+        AppleManager.I.SpawnApple(applePos);
         Debug.Log("SnakeEatAppleEvent Reverse2 snake.links.Count: " + snake.links.Count);
     }
 

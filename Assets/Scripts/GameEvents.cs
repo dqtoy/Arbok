@@ -57,6 +57,12 @@ public class GameEvents<T, U> where T : CompoundGameEvent<U>, new() {
 
 public abstract class CompoundGameEvent<T> {
     public abstract IList<Type> PriorityMap { get; }
+    // EXAMPLE
+    // static List<Type> priorityMap = new List<Type> {
+    //     typeof(SnakeEatAppleEvent),
+    //     typeof(SnakeChangeDirectionEvent),
+    //     typeof(SnakeMoveEvent),
+    // };
 
     public GameEvent<T>[] events;
 
@@ -86,4 +92,5 @@ public abstract class CompoundGameEvent<T> {
 public interface GameEvent<T> {
     void Execute(T actor);
     void Reverse(T actor);
+    string ToString();
 }

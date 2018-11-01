@@ -1,7 +1,10 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
+using Random = UnityEngine.Random;
 
 public class AppleManager : NetworkBehaviour, ITickable {
 	public static AppleManager I;
@@ -26,7 +29,15 @@ public class AppleManager : NetworkBehaviour, ITickable {
 	}
 
 	[Server]
-	Apple SpawnRandomApple() => SpawnApple(new AppleState() { isActive = true, position = RandomSpawnPosition() });
+	void SpawnRandomApple() => SpawnApple(new AppleState() { isActive = true, position = RandomSpawnPosition() });
+
+	public void DeSpawnApple(Vector3 applePos) {
+		var apple = GetAppleAtPosition(applePos);
+		if (apple.gameObject.activeSelf == false) {
+			throw new Exception("Expected apple to be alive");
+		}
+		apple.gameObject.SetActive(false);
+	}
 
 	[Server]
 	Vector3 RandomSpawnPosition() => new Vector3(RandomFloat(), 0, RandomFloat());
@@ -43,11 +54,19 @@ public class AppleManager : NetworkBehaviour, ITickable {
 		all.Clear();
 	}
 
-	public Apple SpawnApple(AppleState state) {
-		// Toolbox.Log("AppleManager SpawnApple");
-		var newApple = Instantiate(applePrefab, state.position, Quaternion.identity, transform);
-		newApple.SetActive(state.isActive);
-		return newApple.GetComponent<Apple>();
+	public void SpawnApple(Vector3 position) {
+		SpawnApple(new AppleState() { isActive = true, position = position });
+	}
+
+	public void SpawnApple(AppleState state) {
+		var apple = GetAppleAtPosition(state.position);
+
+		if (apple) {
+			apple.gameObject.SetActive(true);
+		} else {
+			var newApple = Instantiate(applePrefab, state.position, Quaternion.identity, transform);
+			newApple.SetActive(state.isActive);
+		}
 	}
 
 	public void DoTick() {
@@ -56,5 +75,13 @@ public class AppleManager : NetworkBehaviour, ITickable {
 
 	public void RollbackTick() {
 		throw new System.NotImplementedException();
+	}
+
+	public bool IsAliveAppleAtPosition(Vector3 pos) {
+		return AppleManager.I.all.Any(x => (x.gameObject.activeSelf && x.transform.position == pos));
+	}
+
+	public Apple GetAppleAtPosition(Vector3 pos) {
+		return AppleManager.I.all.FirstOrDefault(x => x.transform.position == pos);
 	}
 }
