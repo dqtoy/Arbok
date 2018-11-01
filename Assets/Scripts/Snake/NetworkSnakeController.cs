@@ -60,10 +60,7 @@ public class NetworkSnakeController : NetworkBehaviour {
     [TargetRpc]
     public void TargetReceiveApplePositions(NetworkConnection connection, string appleStatesJson) {
         Toolbox.Log("TargetReceiveApplePositions: isServer: " + isServer);
-        if (isServer) {
-            AppleManager.I.EnableAll();
-        } else {
-            AppleManager.I.DestroyAll();
+        if (!isServer) {
             JsonConvert.DeserializeObject<AppleState[]>(appleStatesJson).ToList().ForEach(apple => {
                 AppleManager.I.SpawnApple(apple);
             });

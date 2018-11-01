@@ -78,6 +78,6 @@ public class GameStateManager : NetworkBehaviour {
 
 	void OnDestroy() {
 		Destroy(BlockFloor.I.gameObject);
-		AppleManager.I.DestroyAll();
+		AppleManager.I.Reset();
 	}
 }

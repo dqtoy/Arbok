@@ -1,33 +1,47 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
 
-public class AppleManager : MonoBehaviour {
+public class AppleManager : NetworkBehaviour, ITickable {
 	public static AppleManager I;
 
 	public List<Apple> all = new List<Apple>();
 	public GameObject applePrefab;
 	public int startingAppleCount;
 	public int spawnAreaSize;
+	public int deadZoneSize;
 
 	void Awake() {
 		I = this;
 	}
 
-	void Update() {
-
-	}
-
-	// Server only
+	[Server]
 	public void SpawnStartingApples() {
 		Toolbox.Log("AppleManager SpawnStartingApples");
-		DestroyAll();
+		Reset();
 		for (int i = 0; i < startingAppleCount; i++) {
 			SpawnRandomApple();
 		}
 	}
 
-	public void DestroyAll() {
+	[Server]
+	Apple SpawnRandomApple() => SpawnApple(new AppleState() { isActive = true, position = RandomSpawnPosition() });
+
+	Vector3 RandomSpawnPosition() => new Vector3(RandomFloat(), 0, RandomFloat());
+
+	float RandomFloat() => Random.Range(deadZoneSize / 2, spawnAreaSize / 2) * RandomNegative();
+
+	int RandomNegative() => Random.value > 0.5 ? 1 : -1;
+
+	public Apple SpawnApple(AppleState state) {
+		// Toolbox.Log("AppleManager SpawnApple");
+		var newApple = Instantiate(applePrefab, state.position, Quaternion.identity, transform);
+		newApple.SetActive(state.isActive);
+		return newApple.GetComponent<Apple>();
+	}
+
+	public void Reset() {
 		Toolbox.Log("AppleManager DestroyAll");
 		all.ForEach(x => Destroy(x.gameObject));
 		all.Clear();
@@ -38,18 +52,11 @@ public class AppleManager : MonoBehaviour {
 		all.ForEach(x => x.gameObject.SetActive(true));
 	}
 
-	Apple SpawnRandomApple() {
-		return SpawnApple(new AppleState() { isActive = true, position = GetRandomAppleSpawnPosition() });
+	public void DoTick() {
+		throw new System.NotImplementedException();
 	}
 
-	Vector3 GetRandomAppleSpawnPosition() {
-		return new Vector3(Random.Range(spawnAreaSize / -2, spawnAreaSize / 2), 0, Random.Range(spawnAreaSize / -2, spawnAreaSize / 2));
-	}
-
-	public Apple SpawnApple(AppleState state) {
-		// Toolbox.Log("AppleManager SpawnApple");
-		var newApple = Instantiate(applePrefab, state.position, Quaternion.identity, transform);
-		newApple.SetActive(state.isActive);
-		return newApple.GetComponent<Apple>();
+	public void RollbackTick() {
+		throw new System.NotImplementedException();
 	}
 }

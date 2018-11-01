@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BlockFloor : MonoBehaviour {
+public class BlockFloor : MonoBehaviour, ITickable {
 	public static BlockFloor I;
 
 	public GameObject floorBlockPrefab;
@@ -102,7 +102,7 @@ public class BlockFloor : MonoBehaviour {
 		GlobalTick.OnRollbackTick -= RollbackTick;
 	}
 
-	void DoTick() {
+	public void DoTick() {
 		var x = GetNextBlockToDrop();
 		if (x == null) {
 			nextDrop -= dropDirections[dropDirectionIndex];
@@ -119,7 +119,7 @@ public class BlockFloor : MonoBehaviour {
 		DropBlock(x);
 	}
 
-	void RollbackTick() {
+	public void RollbackTick() {
 		Debug.Log("RollbackTick");
 		GameObject killBlock = killBlocks[killBlocks.Count - 1];
 		killBlocks.RemoveAt(killBlocks.Count - 1);

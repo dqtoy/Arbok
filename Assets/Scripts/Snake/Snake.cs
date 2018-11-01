@@ -8,7 +8,7 @@ using UnityEngine.Networking;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-public class Snake : NetworkBehaviour {
+public class Snake : NetworkBehaviour, ITickable {
     public static List<Snake> all = new List<Snake>();
 
     public GameObject snakeTailPrefab;
@@ -95,7 +95,7 @@ public class Snake : NetworkBehaviour {
         }
     }
 
-    void DoTick() {
+    public void DoTick() {
         if (!isDead) {
             DoDeathCheck();
             DoAppleEatCheck();
@@ -112,25 +112,15 @@ public class Snake : NetworkBehaviour {
         }
     }
 
-    bool DidWeCollideWithSelf() {
-        return links.Any(doesPositionMatchHeadPosition);
-    }
+    bool DidWeCollideWithSelf() => links.Any(doesPositionMatchHeadPosition);
 
-    bool DidWeCollideWithWall() {
-        return Wall.all.Any(doesPositionMatchHeadPosition);
-    }
+    bool DidWeCollideWithWall() => Wall.all.Any(doesPositionMatchHeadPosition);
 
-    bool DidWeCollideWithOtherSnake() {
-        return Snake.all.Where(SnakeIsAlive).Any(x => x.links.Any(doesPositionMatchHeadPosition));
-    }
+    bool DidWeCollideWithOtherSnake() => all.Where(SnakeIsAlive).Any(x => x.links.Any(doesPositionMatchHeadPosition));
 
-    bool SnakeIsAlive(Snake s) {
-        return s.isDead == false;
-    }
+    bool SnakeIsAlive(Snake s) => s.isDead == false;
 
-    bool doesPositionMatchHeadPosition(MonoBehaviour x) {
-        return x.transform.position == head.transform.position;
-    }
+    bool doesPositionMatchHeadPosition(MonoBehaviour x) => x.transform.position == head.transform.position;
 
     void DoAppleEatCheck() {
         var apple = AppleManager.I.all.FirstOrDefault(x => (x.gameObject.activeSelf && x.transform.position == head.transform.position));
@@ -142,7 +132,7 @@ public class Snake : NetworkBehaviour {
         snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick, new SnakeEatAppleEvent(apple));
     }
 
-    void RollbackTick() {
+    public void RollbackTick() {
         //Toolbox.Log("RollbackTick");
         snakeEvents.ReverseEventsAtTickIfAny(GlobalTick.I.currentTick, this);
         AfterRollbackTick?.Invoke();
