@@ -111,12 +111,12 @@ public class SnakeEatAppleEvent : GameEvent<Snake> {
     }
 
     public void Reverse(Snake snake) {
-        Debug.Log("SnakeEatAppleEvent Reverse1 snake.links.Count: " + snake.links.Count);
+        // Toolbox.Log("SnakeEatAppleEvent Reverse1 snake.links.Count: " + snake.links.Count);
         var firstTailLink = snake.links.Last();
         snake.links.Remove(firstTailLink);
         GameObject.Destroy(firstTailLink.gameObject);
         AppleManager.I.SpawnApple(applePos);
-        Debug.Log("SnakeEatAppleEvent Reverse2 snake.links.Count: " + snake.links.Count);
+        // Toolbox.Log("SnakeEatAppleEvent Reverse2 snake.links.Count: " + snake.links.Count);
     }
 
     public override string ToString() {

@@ -26,7 +26,7 @@ public class BlockFloor : MonoBehaviour, ITickable {
 	List<GameObject> dropBlocks = new List<GameObject>();
 
 	void Awake() {
-		Debug.Log("BlockFloor Awake");
+		Toolbox.Log("BlockFloor Awake");
 		I = this;
 		transform.localScale = Vector3.one;
 		startScale = transform.localScale;
@@ -36,11 +36,11 @@ public class BlockFloor : MonoBehaviour, ITickable {
 
 	// Use this for initialization
 	void Start() {
-		Debug.Log("BlockFloor Start");
+		Toolbox.Log("BlockFloor Start");
 	}
 
 	void Init(int tick) {
-		Debug.Log("BlockFloor GlobalTick.OnInitialized");
+		Toolbox.Log("BlockFloor GlobalTick.OnInitialized");
 
 		killBlocks.Clear();
 		nextDrops.Clear();
@@ -97,7 +97,7 @@ public class BlockFloor : MonoBehaviour, ITickable {
 	}
 
 	public void StopDropping() {
-		Debug.Log("BlockFloor StopDropping");
+		Toolbox.Log("BlockFloor StopDropping");
 		GlobalTick.OnDoTick -= DoTick;
 		GlobalTick.OnRollbackTick -= RollbackTick;
 	}
@@ -120,7 +120,7 @@ public class BlockFloor : MonoBehaviour, ITickable {
 	}
 
 	public void RollbackTick() {
-		Debug.Log("RollbackTick");
+		Toolbox.Log("RollbackTick");
 		GameObject killBlock = killBlocks[killBlocks.Count - 1];
 		killBlocks.RemoveAt(killBlocks.Count - 1);
 

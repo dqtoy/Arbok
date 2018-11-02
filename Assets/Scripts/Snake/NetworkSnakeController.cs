@@ -43,7 +43,7 @@ public class NetworkSnakeController : NetworkBehaviour {
     }
 
     void OnGlobalTickInitialized(int tick) {
-        Debug.Log("NetworkSnakeController OnGlobalTickInitialized");
+        Toolbox.Log("NetworkSnakeController OnGlobalTickInitialized");
         initialized = true;
         snake.SpawnOnNextTick();
     }
@@ -121,16 +121,16 @@ public class NetworkSnakeController : NetworkBehaviour {
 
         if (!initialized || snake.isDead) return;
 
-        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) {
+        if ((Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow)) && snake.currentDirection != Down.I) {
             SendNewDirection(Up.I);
         }
-        if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) {
+        if ((Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow)) && snake.currentDirection != Left.I) {
             SendNewDirection(Right.I);
         }
-        if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) {
+        if ((Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow)) && snake.currentDirection != Up.I) {
             SendNewDirection(Down.I);
         }
-        if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) {
+        if ((Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow)) && snake.currentDirection != Right.I) {
             SendNewDirection(Left.I);
         }
     }

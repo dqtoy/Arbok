@@ -30,8 +30,8 @@ public class Snake : NetworkBehaviour, ITickable {
     }
 
     void Awake() {
-        Debug.Log("Snake Awake: " + GetInstanceID());
-        Debug.Log("Snake Awake Frame: " + Time.frameCount);
+        Toolbox.Log("Snake Awake: " + GetInstanceID());
+        Toolbox.Log("Snake Awake Frame: " + Time.frameCount);
         snakeEvents = new GameEvents<SnakeCompoundEvent, Snake>();
         links = new List<SnakeTail>();
         all.Add(this);
@@ -42,7 +42,7 @@ public class Snake : NetworkBehaviour, ITickable {
     }
 
     public void SpawnOnNextTick() {
-        Debug.Log("Snake SpawnOnNextTick: " + GetInstanceID());
+        Toolbox.Log("Snake SpawnOnNextTick: " + GetInstanceID());
         var ticksAhead = 1;
         DoEventAtNextTick(new SnakeSpawnEvent(), ticksAhead);
         CmdSpawn(GlobalTick.I.currentTick + ticksAhead);
@@ -64,7 +64,7 @@ public class Snake : NetworkBehaviour, ITickable {
     }
 
     void Start() {
-        Debug.Log("Snake Start " + Time.frameCount);
+        Toolbox.Log("Snake Start " + Time.frameCount);
     }
 
     public void StartTicking() {

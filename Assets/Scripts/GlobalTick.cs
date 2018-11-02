@@ -27,12 +27,12 @@ public class GlobalTick : NetworkBehaviour {
 	bool initialized = false;
 
 	void Awake() {
-		Debug.Log("GlobalTick Awake " + GetInstanceID());
+		Toolbox.Log("GlobalTick Awake " + GetInstanceID());
 		I = this;
 	}
 
 	void Start() {
-		Debug.Log("GlobalTick Start Time.frameCount: " + Time.frameCount);
+		Toolbox.Log("GlobalTick Start Time.frameCount: " + Time.frameCount);
 	}
 
 	[Server]
@@ -120,26 +120,26 @@ public class GlobalTick : NetworkBehaviour {
 	}
 
 	void RollbackTick() {
-		Toolbox.Log("RollbackTick");
+		// Toolbox.Log("RollbackTick");
 		OnRollbackTick?.Invoke();
 		currentTick--;
 	}
 
 	public void Reset() {
-		Debug.Log("Reset");
+		Toolbox.Log("Reset");
 		currentTick = 0;
 		elapsedTime = 0;
 	}
 
 	[Server]
 	public void InitTickForNewClient(NetworkConnection connection) {
-		Debug.Log("InitTickForNewClient");
+		Toolbox.Log("InitTickForNewClient");
 		TargetInitTick(connection, this.currentTick);
 	}
 
 	[TargetRpc]
 	public void TargetInitTick(NetworkConnection connection, int tick) {
-		Debug.Log("RpcInitTick");
+		Toolbox.Log("RpcInitTick");
 		if (!isServer) {
 			if (tick > currentTick) {
 				RollForwardToTick(tick);
@@ -151,7 +151,7 @@ public class GlobalTick : NetworkBehaviour {
 	}
 
 	void Init(int tick) {
-		Debug.Log("Init servertick: " + tick);
+		Toolbox.Log("Init servertick: " + tick);
 		// currentTick = tick;
 		initialized = true;
 		elapsedTime = 0;

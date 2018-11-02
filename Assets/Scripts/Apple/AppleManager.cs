@@ -94,16 +94,16 @@ public class AppleManager : NetworkBehaviour, ITickable {
 			var newPos = RandomSpawnPosition();
 			var tickToSpawn = GlobalTick.I.currentTick;
 			appleEvents.AddOrReplaceAtTick(tickToSpawn, new AppleSpawnEvent(newPos));
-			Toolbox.Log("AppleManager ServerTick % 10 " + tickToSpawn + JsonConvert.SerializeObject(newPos));
+			// Toolbox.Log("AppleManager ServerTick % 10 " + tickToSpawn + JsonConvert.SerializeObject(newPos));
 			RpcReceiveSpawn(tickToSpawn, newPos);
 		}
 	}
 
 	[ClientRpc]
 	void RpcReceiveSpawn(int tick, Vector3 pos) {
-		Toolbox.Log("AppleManager RpcReceiveSpawn " + tick + JsonConvert.SerializeObject(pos));
+		// Toolbox.Log("AppleManager RpcReceiveSpawn " + tick + JsonConvert.SerializeObject(pos));
 		if (!isServer) {
-			Toolbox.Log("AppleManager RpcReceiveSpawn !isServer");
+			// Toolbox.Log("AppleManager RpcReceiveSpawn !isServer");
 			appleEvents.CorrectEventAtTick(new AppleSpawnEvent(pos), tick);
 		}
 	}

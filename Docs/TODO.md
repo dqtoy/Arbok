@@ -35,7 +35,7 @@ PHASE ARBOK
 - [ ] use animation to hide latency issues
 - [ ] do proper lockstep with client side prediction
     - every client sends player actions every tick + last 10 ticks, unreliably
-    - when new client joins, server sends gamestate at current tick
+    - when new client joins, server sends game state at current tick
     - then the client knows exactly what tick it's at and can be sure that it hasn't missed anything, and it knows what events from what players it needs from the future
 - [ ] queue up turn events to allow doing a quick 180
 

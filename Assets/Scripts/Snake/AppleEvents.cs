@@ -19,12 +19,12 @@ public class AppleSpawnEvent : GameEvent<AppleManager> {
     }
 
     public void Execute(AppleManager appleManager) {
-        Toolbox.Log("AppleSpawnEvent Execute");
+        // Toolbox.Log("AppleSpawnEvent Execute");
         appleManager.SpawnApple(spawnPosition);
     }
 
     public void Reverse(AppleManager appleManager) {
-        Toolbox.Log("AppleSpawnEvent Reverse");
+        // Toolbox.Log("AppleSpawnEvent Reverse");
         appleManager.DeSpawnApple(spawnPosition);
     }
 
