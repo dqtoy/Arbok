@@ -40,6 +40,7 @@ public class AppleManager : NetworkBehaviour, ITickable {
 	[Server]
 	void SpawnRandomApple() => SpawnApple(new AppleState() { isActive = true, position = RandomSpawnPosition() });
 
+	// TODO Do we need to not destroy it?
 	public void DeSpawnApple(Vector3 applePos) {
 		var apple = GetAppleAtPosition(applePos);
 		if (apple.gameObject.activeSelf == false) {
@@ -56,9 +57,12 @@ public class AppleManager : NetworkBehaviour, ITickable {
 	[Server]
 	int RandomNegative() => Random.value > 0.5 ? 1 : -1;
 
-	[Server]
 	public void Reset() {
 		Toolbox.Log("AppleManager Reset");
+		DestroyAllApples();
+	}
+
+	public void DestroyAllApples() {
 		all.ForEach(x => Destroy(x.gameObject));
 		all.Clear();
 	}

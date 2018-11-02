@@ -32,6 +32,8 @@ PHASE ARBOK
 - [ ] playback game after game ends
 - [x] make snake death a reversible event
 - [ ] maybe sync entire event list of snakes when joining in progress game?
+- [ ] make way to prioritize different event types like snake vs apple
+- [ ] store positions for snakes and apples in 2D array, first key is x position, second key is y, O(1)
 
 ## Possible Issues
 - Apple syncing
