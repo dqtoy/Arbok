@@ -53,7 +53,7 @@ public class NetworkSnakeController : NetworkBehaviour {
         Toolbox.Log("NetworkSnakeController CmdRequestApplePositions");
         TargetReceiveApplePositions(
             connectionToClient,
-            JsonConvert.SerializeObject(AppleManager.I.all.Select(x => x.ToState()).ToArray())
+            AppleManager.I.SerializeAllApplesState()
         );
     }
 
@@ -61,10 +61,7 @@ public class NetworkSnakeController : NetworkBehaviour {
     public void TargetReceiveApplePositions(NetworkConnection connection, string appleStatesJson) {
         Toolbox.Log("TargetReceiveApplePositions: isServer: " + isServer);
         if (!isServer) {
-            JsonConvert.DeserializeObject<AppleState[]>(appleStatesJson).ToList().ForEach(apple => {
-                AppleManager.I.Reset();
-                AppleManager.I.SpawnApple(apple);
-            });
+            AppleManager.I.DeserializeAndLoadAllApplesState(appleStatesJson);
         }
 
         gotApples = true;
@@ -72,6 +69,8 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     [Command]
     public void CmdRequestSnakePositions() {
+
+        TargetReceiveSnakePosition(JsonConvert.SerializeObject(Snake.all.Select(x => x.ToState())));
 
         // TODO Pass all snake in one call
         Snake.all.ForEach(
@@ -92,6 +91,25 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     [TargetRpc]
     public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, short direction, string linksJson, NetworkInstanceId netId, bool isDead, int tick) {
+        if (netId == this.netId) return;
+
+        GlobalTick.I.SetTickForSnakeStuff(tick);
+
+        var snakeToModify = Snake.all.First(x => x.GetComponent<NetworkIdentity>().netId == netId);
+
+        snakeToModify.SetSnakeData(new SnakeState() {
+            linkPositions = JsonConvert.DeserializeObject<Vector3[]>(linksJson),
+                headPosition = position,
+                direction = Direction.Deserialize(direction),
+                isDead = isDead
+        });
+
+        gotSnakes = true;
+    }
+
+    [TargetRpc]
+    public void TargetReceiveAllSnakesState(NetworkConnection connection, string allSnakesJson, int tick) {
+        JsonCon
         if (netId == this.netId) return;
 
         GlobalTick.I.SetTickForSnakeStuff(tick);

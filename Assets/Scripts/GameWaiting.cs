@@ -27,8 +27,6 @@ public class GameWaiting : GameState {
 			Instantiate(go);
 		}
 
-		AppleManager.I.ServerStart();
-
 		var globalTick = Instantiate(globalTickPrefab);
 		globalTick.GetComponent<GlobalTick>().ServerStart();
 		NetworkServer.Spawn(globalTick);

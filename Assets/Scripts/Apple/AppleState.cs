@@ -1,6 +1,10 @@
+using Newtonsoft.Json;
 using UnityEngine;
 
 public class AppleState {
-    public Vector3 position;
-    public bool isActive;
+    public int spawnTick;
+    public int eatenTick = int.MaxValue;
+    public Vector2 position;
+    [JsonIgnore]
+    public GameObject spawnedApple;
 }

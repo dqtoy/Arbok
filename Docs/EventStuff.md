@@ -16,9 +16,6 @@ AllApplesState:
 
 You don't even have to generate it ahead of time if you can make a pure function that takes in the tick and returns the spawn position
 
-
-
-
 Snake
 - DoTick
     - check if there is a possible apple at head position
@@ -32,3 +29,13 @@ Snake
     - if yes, was it eaten on this tick?
     - if yes, reverse eating it
         - marke apple as not eaten in AllApplesState, and remove snake tail
+
+AppleManager
+- DoTick
+    - is there an apple spawn at this tick?
+    - if yes, is there a snake head, tail, or wall on the apple position?
+    - if no, instantiate apple at position
+- RollbackTick
+    - is there an apple spawn at this tick?
+    - if yes, is there a snake head, tail, or wall on the apple position?
+    - if no, destroy apple at position

@@ -8,7 +8,6 @@ public class SnakeCompoundEvent : CompoundGameEvent<Snake> {
     static List<Type> priorityMap = new List<Type> {
         typeof(SnakeSpawnEvent),
         typeof(SnakeDieEvent),
-        typeof(SnakeEatAppleEvent),
         typeof(SnakeChangeDirectionEvent),
         typeof(SnakeMoveEvent),
     };
@@ -94,33 +93,6 @@ public class SnakeChangeDirectionEvent : GameEvent<Snake> {
         } else {
             return false;
         }
-    }
-}
-
-public class SnakeEatAppleEvent : GameEvent<Snake> {
-    Vector3 applePos;
-
-    public SnakeEatAppleEvent(Vector3 applePos) {
-        this.applePos = applePos;
-    }
-
-    public void Execute(Snake snake) {
-        AppleManager.I.DeSpawnApple(applePos);
-        var newTail = GameObject.Instantiate(snake.snakeTailPrefab, snake.transform);
-        snake.links.Add(newTail.GetComponent<SnakeTail>());
-    }
-
-    public void Reverse(Snake snake) {
-        // Toolbox.Log("SnakeEatAppleEvent Reverse1 snake.links.Count: " + snake.links.Count);
-        var firstTailLink = snake.links.Last();
-        snake.links.Remove(firstTailLink);
-        GameObject.Destroy(firstTailLink.gameObject);
-        AppleManager.I.SpawnApple(applePos);
-        // Toolbox.Log("SnakeEatAppleEvent Reverse2 snake.links.Count: " + snake.links.Count);
-    }
-
-    public override string ToString() {
-        return "E";
     }
 }
 

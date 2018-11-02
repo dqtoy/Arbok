@@ -10,113 +10,143 @@ using Random = UnityEngine.Random;
 public class AppleManager : NetworkBehaviour, ITickable {
 	public static AppleManager I;
 
-	public List<Apple> all = new List<Apple>();
 	public GameObject applePrefab;
 	public int startingAppleCount;
 	public int spawnAreaSize;
 	public int deadZoneSize;
 
-	public GameEvents<AppleCompoundEvent, AppleManager> appleEvents { get; private set; }
+	IDictionary<Vector2, AppleState> allApplesState = new Dictionary<Vector2, AppleState>();
+
+	public string SerializeAllApplesState() {
+		return JsonConvert.SerializeObject(allApplesState);
+	}
+
+	public void DeserializeAndLoadAllApplesState(string allApplesStateJson) {
+		this.allApplesState = JsonConvert.DeserializeObject<Dictionary<Vector2, AppleState>>(allApplesStateJson);
+
+		this.allApplesState.Values.ToList().ForEach(SpawnApple);
+	}
 
 	void Awake() {
 		I = this;
 
-		appleEvents = new GameEvents<AppleCompoundEvent, AppleManager>();
 		GlobalTick.OnDoTick += DoTick;
 		GlobalTick.OnRollbackTick += RollbackTick;
 	}
 
-	[Server]
-	public void ServerStart() {
-		Toolbox.Log("AppleManager ServerStart");
-
-		Reset();
-
-		for (int i = 0; i < startingAppleCount; i++) {
-			SpawnRandomApple();
-		}
-	}
-
-	[Server]
-	void SpawnRandomApple() => SpawnApple(new AppleState() { isActive = true, position = RandomSpawnPosition() });
-
-	// TODO Do we need to not destroy it?
-	public void DeSpawnApple(Vector3 applePos) {
-		var apple = GetAppleAtPosition(applePos);
-		if (apple.gameObject.activeSelf == false) {
-			throw new Exception("Expected apple to be alive");
-		}
-		apple.gameObject.SetActive(false);
-	}
-
-	[Server]
-	Vector3 RandomSpawnPosition() => new Vector3(RandomFloat(), 0, RandomFloat());
-
-	float RandomFloat() => Random.Range(deadZoneSize / 2, spawnAreaSize / 2) * RandomNegative();
-
-	[Server]
-	int RandomNegative() => Random.value > 0.5 ? 1 : -1;
-
 	public void Reset() {
 		Toolbox.Log("AppleManager Reset");
 		DestroyAllApples();
+		allApplesState.Clear();
 	}
 
 	public void DestroyAllApples() {
-		all.ForEach(x => Destroy(x.gameObject));
-		all.Clear();
+		allApplesState
+			.Values
+			.Select(SpawnedApple)
+			.Where(NotNull)
+			.ToList()
+			.ForEach(Destroy);
 	}
 
-	public void SpawnApple(Vector3 position) {
-		SpawnApple(new AppleState() { isActive = true, position = position });
+	GameObject SpawnedApple(AppleState x) => x.spawnedApple;
+
+	bool NotNull(System.Object x) => x != null;
+
+	void SpawnApple(AppleState appleState) {
+		allApplesState[appleState.position].spawnedApple = Instantiate(
+			applePrefab,
+			new Vector3(appleState.position.x, 0, appleState.position.y),
+			Quaternion.identity,
+			transform
+		);
 	}
 
-	public void SpawnApple(AppleState state) {
-		var apple = GetAppleAtPosition(state.position);
+	void DeSpawnApple(AppleState appleState) {
+		AppleState apple;
 
-		if (apple) {
-			apple.gameObject.SetActive(true);
-		} else {
-			var newApple = Instantiate(applePrefab, state.position, Quaternion.identity, transform);
-			newApple.SetActive(state.isActive);
+		if (TryGetAppleAtPosition(appleState.position, out apple) == false) {
+			throw new Exception("Expected apple to be at position: spawnTick: " + appleState.spawnTick + " | " + JsonConvert.SerializeObject(appleState.position));
 		}
+
+		Destroy(apple.spawnedApple);
+
+		allApplesState[appleState.position].spawnedApple = null;
 	}
 
-	public void DoTick() {
-		if (isServer) ServerTick();
+	public void DoTick(int tick) {
+		// - is there an apple spawn at this tick?
+		// - if yes, is there a snake head, tail, or wall on the apple position?
+		// - if no, instantiate apple at position
 
-		appleEvents.ExecuteEventsAtTickIfAny(GlobalTick.I.currentTick, this);
+		Vector2 x;
+
+		TryGetApplePositionByTick(tick, out x);
+
+		var appleState = TryGetAppleBySpawnTick(tick);
+
+		if (appleState == null) return;
+
+		if (IsAppleSpawnBlocked(appleState)) return;
+
+		SpawnApple(appleState);
 	}
 
-	[Server]
-	void ServerTick() {
-		if (GlobalTick.I.currentTick % 10 == 0) {
-			var newPos = RandomSpawnPosition();
-			var tickToSpawn = GlobalTick.I.currentTick;
-			appleEvents.AddOrReplaceAtTick(tickToSpawn, new AppleSpawnEvent(newPos));
-			// Toolbox.Log("AppleManager ServerTick % 10 " + tickToSpawn + JsonConvert.SerializeObject(newPos));
-			RpcReceiveSpawn(tickToSpawn, newPos);
-		}
+	public AppleState TryGetAppleBySpawnTick(int tick) {
+		Vector2 applePosition;
+
+		if (TryGetApplePositionByTick(tick, out applePosition) == false) return null;
+
+		if (allApplesState.ContainsKey(applePosition)) return allApplesState[applePosition];
+
+		allApplesState[applePosition] = new AppleState() {
+			position = applePosition,
+				spawnTick = tick
+		};
+
+		return allApplesState[applePosition];
 	}
 
-	[ClientRpc]
-	void RpcReceiveSpawn(int tick, Vector3 pos) {
-		// Toolbox.Log("AppleManager RpcReceiveSpawn " + tick + JsonConvert.SerializeObject(pos));
-		if (!isServer) {
-			// Toolbox.Log("AppleManager RpcReceiveSpawn !isServer");
-			appleEvents.CorrectEventAtTick(new AppleSpawnEvent(pos), tick);
-		}
+	bool TryGetApplePositionByTick(int tick, out Vector2 x) {
+		x = Vector2.zero;
+
+		if (tick % 2 == 0) return false;
+
+		x.x = tick;
+		x.y = tick;
+
+		return true;
 	}
 
-	public void RollbackTick() {
-		appleEvents.ReverseEventsAtTickIfAny(GlobalTick.I.currentTick, this);
+	bool IsAppleSpawnBlocked(AppleState appleState) {
+		return false;
 	}
 
-	public bool IsAliveAppleAtPosition(Vector3 pos) {
-		return AppleManager.I.all.Any(x => (x.gameObject.activeSelf && x.transform.position == pos));
+	public void RollbackTick(int tick) {
+		// - is there an apple spawn at this tick?
+		// - if yes, is there a snake head, tail, or wall on the apple position?
+		// - if no, destroy apple at position
+
+		var appleState = TryGetAppleBySpawnTick(tick);
+
+		if (appleState == null) return;
+
+		if (IsAppleSpawnBlocked(appleState)) return;
+
+		DeSpawnApple(appleState);
 	}
 
-	public Apple GetAppleAtPosition(Vector3 pos) {
-		return AppleManager.I.all.FirstOrDefault(x => x.transform.position == pos);
+	public bool TryGetAppleAtPosition(Vector3 pos, out AppleState appleState) => TryGetAppleAtPosition(new Vector2(pos.x, pos.z), out appleState);
+
+	public bool TryGetAppleAtPosition(Vector2 pos, out AppleState appleState) => allApplesState.TryGetValue(pos, out appleState);
+
+	public void EatApple(int tick, AppleState appleState) {
+		allApplesState[appleState.position].eatenTick = tick;
+		DeSpawnApple(appleState);
+	}
+
+	public void ReverseEatApple(int tick, AppleState appleState) {
+		SpawnApple(appleState);
+		allApplesState[appleState.position].eatenTick = int.MaxValue;
 	}
 }

@@ -48,8 +48,8 @@ public class BlockFloor : MonoBehaviour, ITickable {
 		dropBlocks.Clear();
 
 		StartDropping();
-		for (int i = 0; i < tick; i++) {
-			DoTick();
+		for (int i = 1; i <= tick; i++) {
+			DoTick(i);
 		}
 	}
 
@@ -102,7 +102,7 @@ public class BlockFloor : MonoBehaviour, ITickable {
 		GlobalTick.OnRollbackTick -= RollbackTick;
 	}
 
-	public void DoTick() {
+	public void DoTick(int tick) {
 		var x = GetNextBlockToDrop();
 		if (x == null) {
 			nextDrop -= dropDirections[dropDirectionIndex];
@@ -119,7 +119,7 @@ public class BlockFloor : MonoBehaviour, ITickable {
 		DropBlock(x);
 	}
 
-	public void RollbackTick() {
+	public void RollbackTick(int tick) {
 		Toolbox.Log("RollbackTick");
 		GameObject killBlock = killBlocks[killBlocks.Count - 1];
 		killBlocks.RemoveAt(killBlocks.Count - 1);

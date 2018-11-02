@@ -21,8 +21,6 @@ public class Snake : NetworkBehaviour, ITickable {
     public GameEvents<SnakeCompoundEvent, Snake> snakeEvents { get; private set; }
     public List<SnakeTail> links { get; private set; }
 
-    public event Action AfterRollbackTick;
-
     public bool isDead;
 
     public static int GetAlivePlayerCount() {
@@ -81,20 +79,32 @@ public class Snake : NetworkBehaviour, ITickable {
         snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick + ticksInFuture, snakeEvent);
     }
 
-    public void DoTick() {
+    public void DoTick(int tick) {
         if (!isDead) {
-            DoDeathCheck();
-            DoAppleEatCheck();
-            snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick, new SnakeMoveEvent());
+            DoDeathCheck(tick);
+            DoAppleEatCheck(tick);
+            snakeEvents.AddOrReplaceAtTick(tick, new SnakeMoveEvent());
         }
 
-        snakeEvents.ExecuteEventsAtTickIfAny(GlobalTick.I.currentTick, this);
+        snakeEvents.ExecuteEventsAtTickIfAny(tick, this);
     }
 
-    void DoDeathCheck() {
+    public SnakeState ToState() {
+        return new SnakeState() {
+            linkPositions = links.Select(Position),
+                headPosition = head.transform.position,
+                direction = currentDirection,
+                isDead = isDead,
+                netId = netId
+        };
+    }
+
+    Vector3 Position(MonoBehaviour x) => x.transform.position;
+
+    void DoDeathCheck(int tick) {
         if (DidWeCollideWithSelf() || DidWeCollideWithWall() || DidWeCollideWithOtherSnake()) {
             Toolbox.Log("DIE");
-            snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick, new SnakeDieEvent());
+            snakeEvents.AddOrReplaceAtTick(tick, new SnakeDieEvent());
         }
     }
 
@@ -108,20 +118,56 @@ public class Snake : NetworkBehaviour, ITickable {
 
     bool doesPositionMatchHeadPosition(MonoBehaviour x) => x.transform.position == head.transform.position;
 
-    void DoAppleEatCheck() {
-        if (AppleManager.I.IsAliveAppleAtPosition(head.transform.position)) {
-            EatApple(head.transform.position);
-        }
+    void DoAppleEatCheck(int tick) {
+        // - check if there is a possible apple at head position
+        // - if yes, has it spawned?
+        // - if yes, has it been eaten?
+        // - if no, eat it
+        //   - mark apple as eaten in AllApplesState, and add snake tail
+
+        AppleState appleState;
+
+        if (AppleManager.I.TryGetAppleAtPosition(head.transform.position, out appleState) == false) return;
+        Toolbox.Log("DoAppleEatCheck 2");
+
+        if (appleState.spawnTick > tick) return;
+        Toolbox.Log("DoAppleEatCheck 3");
+
+        if (appleState.eatenTick < tick) return;
+        Toolbox.Log("DoAppleEatCheck 4");
+
+        AppleManager.I.EatApple(tick, appleState);
+
+        var newTail = GameObject.Instantiate(snakeTailPrefab, transform).GetComponent<SnakeTail>();
+        links.Add(newTail);
     }
 
-    void EatApple(Vector3 applePos) {
-        snakeEvents.AddOrReplaceAtTick(GlobalTick.I.currentTick, new SnakeEatAppleEvent(applePos));
+    void ReverseAppleEatCheck(int tick) {
+        // - check if there is a possible apple at head position
+        // - if yes, has it spawned?
+        // - if yes, was it eaten on this tick?
+        // - if yes, reverse eating it
+        //   - mark apple as not eaten in AllApplesState, and remove snake tail
+
+        AppleState appleState;
+
+        if (AppleManager.I.TryGetAppleAtPosition(head.transform.position, out appleState) == false) return;
+
+        if (appleState.spawnTick > tick) return;
+
+        if (appleState.eatenTick != tick) return;
+
+        AppleManager.I.ReverseEatApple(tick, appleState);
+
+        var firstTailLink = links.Last();
+        links.Remove(firstTailLink);
+        GameObject.Destroy(firstTailLink.gameObject);
     }
 
-    public void RollbackTick() {
-        //Toolbox.Log("RollbackTick");
-        snakeEvents.ReverseEventsAtTickIfAny(GlobalTick.I.currentTick, this);
-        AfterRollbackTick?.Invoke();
+    public void RollbackTick(int tick) {
+        snakeEvents.ReverseEventsAtTickIfAny(tick, this);
+
+        ReverseAppleEatCheck(tick);
     }
 
     public void SetSnakeData(SnakeState state) {

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -11,8 +11,8 @@ public class GlobalTick : NetworkBehaviour {
 
 	public float ticksPerSecond = 1;
 
-	public static event Action OnDoTick;
-	public static event Action OnRollbackTick;
+	public static event Action<int> OnDoTick;
+	public static event Action<int> OnRollbackTick;
 	public static event Action<int> OnInitialized;
 
 	float elapsedTime = 0;
@@ -75,15 +75,15 @@ public class GlobalTick : NetworkBehaviour {
 				if (Input.GetKey(KeyCode.LeftShift)) {
 					RollForwardToTick(currentTick + 10);
 				} else {
-				DoTick();
-			}
+					DoTick();
+				}
 			}
 			if (Input.GetKeyDown(KeyCode.B) && currentTick > 1) {
 				if (Input.GetKey(KeyCode.LeftShift)) {
 					RollbackToTick(Mathf.Max(currentTick - 10, 1));
 				} else {
-				RollbackTick();
-			}
+					RollbackTick();
+				}
 			}
 		} else {
 			elapsedTime += Time.deltaTime;
@@ -98,7 +98,7 @@ public class GlobalTick : NetworkBehaviour {
 	void DoTick() {
 		currentTick++;
 
-		OnDoTick?.Invoke();
+		OnDoTick?.Invoke(currentTick);
 
 		if (currentTick / 10 % 2 == 0) {
 			DebugScreen.I.SetPlaneRed();
@@ -128,7 +128,7 @@ public class GlobalTick : NetworkBehaviour {
 
 	void RollbackTick() {
 		// Toolbox.Log("RollbackTick");
-		OnRollbackTick?.Invoke();
+		OnRollbackTick?.Invoke(currentTick);
 		currentTick--;
 	}
 

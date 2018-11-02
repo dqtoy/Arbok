@@ -1,4 +1,4 @@
 public interface ITickable {
-    void DoTick();
-    void RollbackTick();
+    void DoTick(int tick);
+    void RollbackTick(int tick);
 }
