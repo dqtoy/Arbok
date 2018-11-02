@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -72,11 +72,18 @@ public class GlobalTick : NetworkBehaviour {
 
 		if (manualTickDebugMode) {
 			if (Input.GetKeyDown(KeyCode.N)) {
+				if (Input.GetKey(KeyCode.LeftShift)) {
+					RollForwardToTick(currentTick + 10);
+				} else {
 				DoTick();
 			}
-
-			if (Input.GetKeyDown(KeyCode.B)) {
+			}
+			if (Input.GetKeyDown(KeyCode.B) && currentTick > 1) {
+				if (Input.GetKey(KeyCode.LeftShift)) {
+					RollbackToTick(Mathf.Max(currentTick - 10, 1));
+				} else {
 				RollbackTick();
+			}
 			}
 		} else {
 			elapsedTime += Time.deltaTime;
