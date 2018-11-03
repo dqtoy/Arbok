@@ -4,7 +4,7 @@ using UnityEngine;
 public class AppleState {
     public int spawnTick;
     public int eatenTick = int.MaxValue;
-    public Vector2 position;
+    public DG_Position position;
     [JsonIgnore]
     public GameObject spawnedApple;
 }

@@ -166,7 +166,7 @@ public class GlobalTick : NetworkBehaviour {
 		OnInitialized?.Invoke(currentTick);
 	}
 
-	public void SetTickForSnakeStuff(int tick) {
+	public void SetTickGorGameStateReceived(int tick) {
 		currentTick = tick;
 	}
 }

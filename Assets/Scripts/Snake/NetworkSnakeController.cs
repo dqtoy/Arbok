@@ -13,8 +13,7 @@ public class NetworkSnakeController : NetworkBehaviour {
 
     Snake snake;
 
-    bool gotApples = false;
-    bool gotSnakes = false;
+    bool gotGameState = false;
     bool initialized = false;
     bool ready = false;
 
@@ -32,8 +31,7 @@ public class NetworkSnakeController : NetworkBehaviour {
         GlobalTick.OnInitialized += OnGlobalTickInitialized;
 
         if (!isServer) {
-            CmdRequestSnakePositions();
-            CmdRequestApplePositions();
+            CmdRequestGameState();
         } else {
             initialized = true;
         }
@@ -49,82 +47,39 @@ public class NetworkSnakeController : NetworkBehaviour {
     }
 
     [Command]
-    public void CmdRequestApplePositions() {
-        Toolbox.Log("NetworkSnakeController CmdRequestApplePositions");
-        TargetReceiveApplePositions(
-            connectionToClient,
-            AppleManager.I.SerializeAllApplesState()
-        );
+    public void CmdRequestGameState() {
+        Toolbox.Log("CmdRequestGameState");
+
+        var allSnakesJson = JsonConvert.SerializeObject(Snake.all.Select(x => x.ToState()));
+        var applesJson = AppleManager.I.SerializeAllApplesState();
+
+        TargetReceiveGameState(connectionToClient, GlobalTick.I.currentTick, applesJson, allSnakesJson);
     }
 
     [TargetRpc]
-    public void TargetReceiveApplePositions(NetworkConnection connection, string appleStatesJson) {
-        Toolbox.Log("TargetReceiveApplePositions: isServer: " + isServer);
-        if (!isServer) {
-            AppleManager.I.DeserializeAndLoadAllApplesState(appleStatesJson);
-        }
+    public void TargetReceiveGameState(NetworkConnection connection, int tick, string appleStatesJson, string allSnakesJson) {
+        Toolbox.Log("TargetReceiveGameState");
 
-        gotApples = true;
+        AppleManager.I.DeserializeAndLoadAllApplesState(appleStatesJson);
+
+        ReceiveAllSnakesState(allSnakesJson);
+
+        GlobalTick.I.SetTickGorGameStateReceived(tick);
+
+        gotGameState = true;
     }
 
-    [Command]
-    public void CmdRequestSnakePositions() {
-
-        TargetReceiveSnakePosition(JsonConvert.SerializeObject(Snake.all.Select(x => x.ToState())));
-
-        // TODO Pass all snake in one call
-        Snake.all.ForEach(
-            x => {
-                var linksJson = JsonConvert.SerializeObject(x.links.Select(y => y.transform.position).ToArray());
-                TargetReceiveSnakePosition(
-                    connectionToClient,
-                    x.head.transform.position,
-                    x.currentDirection.Serialize(),
-                    linksJson,
-                    x.GetComponent<NetworkIdentity>().netId,
-                    x.isDead,
-                    GlobalTick.I.currentTick
-                );
-            }
-        );
+    void ReceiveAllSnakesState(string allSnakesJson) {
+        JsonConvert.DeserializeObject<IEnumerable<SnakeState>>(allSnakesJson)
+            .Where(NotLocalSnake).ToList()
+            .ForEach(LoadStateToSnake);
     }
 
-    [TargetRpc]
-    public void TargetReceiveSnakePosition(NetworkConnection connection, Vector3 position, short direction, string linksJson, NetworkInstanceId netId, bool isDead, int tick) {
-        if (netId == this.netId) return;
+    bool NotLocalSnake(SnakeState x) => x.netId != this.netId;
 
-        GlobalTick.I.SetTickForSnakeStuff(tick);
+    void LoadStateToSnake(SnakeState x) => GetSnakeByNetId(x.netId).SetSnakeData(x);
 
-        var snakeToModify = Snake.all.First(x => x.GetComponent<NetworkIdentity>().netId == netId);
-
-        snakeToModify.SetSnakeData(new SnakeState() {
-            linkPositions = JsonConvert.DeserializeObject<Vector3[]>(linksJson),
-                headPosition = position,
-                direction = Direction.Deserialize(direction),
-                isDead = isDead
-        });
-
-        gotSnakes = true;
-    }
-
-    [TargetRpc]
-    public void TargetReceiveAllSnakesState(NetworkConnection connection, string allSnakesJson, int tick) {
-        JsonCon
-        if (netId == this.netId) return;
-
-        GlobalTick.I.SetTickForSnakeStuff(tick);
-
-        var snakeToModify = Snake.all.First(x => x.GetComponent<NetworkIdentity>().netId == netId);
-
-        snakeToModify.SetSnakeData(new SnakeState() {
-            linkPositions = JsonConvert.DeserializeObject<Vector3[]>(linksJson),
-                headPosition = position,
-                direction = Direction.Deserialize(direction),
-                isDead = isDead
-        });
-
-        gotSnakes = true;
-    }
+    Snake GetSnakeByNetId(NetworkInstanceId netId) => Snake.all.First(x => x.GetComponent<NetworkIdentity>().netId == this.netId);
 
     void Update() {
         if (!isLocalPlayer) return;
@@ -133,7 +88,7 @@ public class NetworkSnakeController : NetworkBehaviour {
             Toolbox.Log(snake.snakeEvents.ToString());
         }
 
-        if (!ready && gotApples && gotSnakes) {
+        if (!ready && gotGameState) {
             Init();
         }
 

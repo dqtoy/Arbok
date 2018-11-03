@@ -127,7 +127,7 @@ public class Snake : NetworkBehaviour, ITickable {
 
         AppleState appleState;
 
-        if (AppleManager.I.TryGetAppleAtPosition(head.transform.position, out appleState) == false) return;
+        if (AppleManager.I.TryGetAppleAtPosition(head.position, out appleState) == false) return;
         Toolbox.Log("DoAppleEatCheck 2");
 
         if (appleState.spawnTick > tick) return;
@@ -151,7 +151,7 @@ public class Snake : NetworkBehaviour, ITickable {
 
         AppleState appleState;
 
-        if (AppleManager.I.TryGetAppleAtPosition(head.transform.position, out appleState) == false) return;
+        if (AppleManager.I.TryGetAppleAtPosition(head.position, out appleState) == false) return;
 
         if (appleState.spawnTick > tick) return;
 

@@ -15,14 +15,15 @@ public class AppleManager : NetworkBehaviour, ITickable {
 	public int spawnAreaSize;
 	public int deadZoneSize;
 
-	IDictionary<Vector2, AppleState> allApplesState = new Dictionary<Vector2, AppleState>();
+	IDictionary<DG_Position, AppleState> allApplesState = new Dictionary<DG_Position, AppleState>();
 
 	public string SerializeAllApplesState() {
+		Debug.Log(JsonConvert.SerializeObject(allApplesState));
 		return JsonConvert.SerializeObject(allApplesState);
 	}
 
 	public void DeserializeAndLoadAllApplesState(string allApplesStateJson) {
-		this.allApplesState = JsonConvert.DeserializeObject<Dictionary<Vector2, AppleState>>(allApplesStateJson);
+		this.allApplesState = JsonConvert.DeserializeObject<Dictionary<DG_Position, AppleState>>(allApplesStateJson);
 
 		this.allApplesState.Values.ToList().ForEach(SpawnApple);
 	}
@@ -79,7 +80,7 @@ public class AppleManager : NetworkBehaviour, ITickable {
 		// - if yes, is there a snake head, tail, or wall on the apple position?
 		// - if no, instantiate apple at position
 
-		Vector2 x;
+		DG_Position x;
 
 		TryGetApplePositionByTick(tick, out x);
 
@@ -93,7 +94,7 @@ public class AppleManager : NetworkBehaviour, ITickable {
 	}
 
 	public AppleState TryGetAppleBySpawnTick(int tick) {
-		Vector2 applePosition;
+		DG_Position applePosition;
 
 		if (TryGetApplePositionByTick(tick, out applePosition) == false) return null;
 
@@ -107,8 +108,8 @@ public class AppleManager : NetworkBehaviour, ITickable {
 		return allApplesState[applePosition];
 	}
 
-	bool TryGetApplePositionByTick(int tick, out Vector2 x) {
-		x = Vector2.zero;
+	bool TryGetApplePositionByTick(int tick, out DG_Position x) {
+		x = DG_Position.zero;
 
 		if (tick % 2 == 0) return false;
 
@@ -136,9 +137,7 @@ public class AppleManager : NetworkBehaviour, ITickable {
 		DeSpawnApple(appleState);
 	}
 
-	public bool TryGetAppleAtPosition(Vector3 pos, out AppleState appleState) => TryGetAppleAtPosition(new Vector2(pos.x, pos.z), out appleState);
-
-	public bool TryGetAppleAtPosition(Vector2 pos, out AppleState appleState) => allApplesState.TryGetValue(pos, out appleState);
+	public bool TryGetAppleAtPosition(DG_Position pos, out AppleState appleState) => allApplesState.TryGetValue(pos, out appleState);
 
 	public void EatApple(int tick, AppleState appleState) {
 		allApplesState[appleState.position].eatenTick = tick;
